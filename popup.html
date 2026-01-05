@@ -81,6 +81,45 @@
       font-size: 14px;
       color: #333;
     }
+    #previewContainer {
+      display: none;
+      margin: 10px 0;
+    }
+    #previewTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      background: white;
+    }
+    #previewTable th {
+      background: #1a73e8;
+      color: white;
+      padding: 6px 4px;
+      position: sticky;
+      top: 0;
+    }
+    #previewTable td {
+      padding: 4px;
+      border: 1px solid #ddd;
+      text-align: center;
+      max-width: 60px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #previewTable td:first-child {
+      text-align: left;
+      max-width: 80px;
+    }
+    #previewTable tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    .table-wrapper {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +136,27 @@
   </div>
   
   <div id="rowCount"></div>
+  
+  <div id="previewContainer">
+    <div class="table-wrapper">
+      <table id="previewTable">
+        <thead>
+          <tr>
+            <th>Particulars</th>
+            <th>N1</th>
+            <th>N2</th>
+            <th>N3</th>
+            <th>K</th>
+            <th>Sign</th>
+            <th>L</th>
+            <th>B</th>
+            <th>H</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+  </div>
   
   <button id="fillBtn" disabled>Fill Form</button>
   

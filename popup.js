@@ -5,6 +5,8 @@ const fileName = document.getElementById('fileName');
 const fillBtn = document.getElementById('fillBtn');
 const status = document.getElementById('status');
 const rowCount = document.getElementById('rowCount');
+const previewContainer = document.getElementById('previewContainer');
+const previewBody = document.getElementById('previewBody');
 
 fileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -17,8 +19,9 @@ fileInput.addEventListener('change', async (e) => {
     const data = await parseFile(file);
     parsedData = data;
     rowCount.textContent = `Found ${data.length} rows`;
+    renderPreview(data);
     fillBtn.disabled = false;
-    showStatus('File parsed successfully!', 'success');
+    showStatus('File parsed successfully! Review data below.', 'success');
   } catch (err) {
     showStatus('Error parsing file: ' + err.message, 'error');
     fillBtn.disabled = true;
@@ -49,6 +52,7 @@ async function parseFile(file) {
             else if (lowerKey === 'l' || lowerKey === 'length') normalized.L = row[key];
             else if (lowerKey === 'b' || lowerKey === 'breadth') normalized.B = row[key];
             else if (lowerKey === 'h' || lowerKey === 'height') normalized.H = row[key];
+            else if (lowerKey === 'sign' || lowerKey === '+/-') normalized.Sign = row[key];
           }
           return normalized;
         });
@@ -90,4 +94,22 @@ function showStatus(msg, type) {
   status.textContent = msg;
   status.className = type;
   status.style.display = 'block';
+}
+
+function renderPreview(data) {
+  previewBody.innerHTML = '';
+  const cols = ['Particulars', 'N1', 'N2', 'N3', 'K', 'Sign', 'L', 'B', 'H'];
+  
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    cols.forEach(col => {
+      const td = document.createElement('td');
+      td.textContent = row[col] ?? '';
+      td.title = row[col] ?? '';
+      tr.appendChild(td);
+    });
+    previewBody.appendChild(tr);
+  });
+  
+  previewContainer.style.display = data.length ? 'block' : 'none';
 }
