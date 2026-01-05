@@ -4,6 +4,9 @@
   "version": "1.0",
   "description": "Auto-fill IRWCMS bill measurement forms from Excel/CSV files",
   "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://ircep.gov.in/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -14,14 +17,15 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": ["https://ircep.gov.in/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
       "resources": ["xlsx.full.min.js"],
-      "matches": ["<all_urls>"]
+      "matches": ["https://ircep.gov.in/*"]
     }
   ]
 }
