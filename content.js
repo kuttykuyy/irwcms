@@ -36,6 +36,10 @@ async function fillFormRows(data) {
     fillField(lastRow, 'N2', row.N2);
     fillField(lastRow, 'N3', row.N3);
     fillField(lastRow, 'K', row.K);
+    
+    // Handle Sign (+/-) radio button
+    selectSign(lastRow, row.Sign);
+    
     fillField(lastRow, 'L', row.L);
     fillField(lastRow, 'B', row.B);
     fillField(lastRow, 'H', row.H);
@@ -96,6 +100,40 @@ function fillField(container, fieldName, value) {
     input.value = value;
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+function selectSign(container, sign) {
+  if (!sign) return;
+  
+  const signValue = String(sign).trim();
+  const isPlus = signValue === '+' || signValue.toLowerCase() === 'plus';
+  
+  // Find radio buttons for +/-
+  const radios = container.querySelectorAll('input[type="radio"]');
+  
+  for (const radio of radios) {
+    const label = radio.nextSibling?.textContent || radio.parentElement?.textContent || '';
+    const value = radio.value || '';
+    
+    if (isPlus) {
+      // Look for + radio
+      if (label.includes('+') || value === '+' || value === 'plus' || value === '1') {
+        radio.click();
+        return;
+      }
+    } else {
+      // Look for - radio
+      if (label.includes('-') || value === '-' || value === 'minus' || value === '0') {
+        radio.click();
+        return;
+      }
+    }
+  }
+  
+  // Fallback: click by position (first = +, second = -)
+  if (radios.length >= 2) {
+    radios[isPlus ? 0 : 1].click();
   }
 }
 
