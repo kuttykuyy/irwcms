@@ -1,35 +1,59 @@
-// License validation
-const LICENSE_PREFIX = 'IRWCMS-';
-const MIN_LICENSE_LENGTH = 16;
+// ============= GUMROAD LICENSE CONFIGURATION =============
+// Replace with your actual Gumroad product ID
+const GUMROAD_PRODUCT_ID = 'YOUR_PRODUCT_ID_HERE';
+// ==========================================================
 
 // Check license on load
 document.addEventListener('DOMContentLoaded', () => {
   checkLicense();
 });
 
-function validateLicenseKey(key) {
-  if (!key || typeof key !== 'string') return false;
-  key = key.trim().toUpperCase();
-  return key.startsWith(LICENSE_PREFIX) && key.length >= MIN_LICENSE_LENGTH;
+async function verifyWithGumroad(licenseKey) {
+  try {
+    const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        product_id: GUMROAD_PRODUCT_ID,
+        license_key: licenseKey,
+        increment_uses_count: 'true'
+      })
+    });
+    
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Gumroad API error:', err);
+    return { success: false, error: 'Network error' };
+  }
 }
 
 function checkLicense() {
-  chrome.storage.local.get(['licenseKey'], (result) => {
-    const key = result.licenseKey;
-    if (validateLicenseKey(key)) {
-      showLicenseActive(key);
+  chrome.storage.local.get(['licenseKey', 'licenseVerified', 'licenseUses'], (result) => {
+    if (result.licenseVerified && result.licenseKey) {
+      // Already verified locally - allow offline usage
+      showLicenseActive(result.licenseKey, result.licenseUses);
     } else {
       showLicenseInactive();
     }
   });
 }
 
-function showLicenseActive(key) {
+function showLicenseActive(key, uses) {
   document.getElementById('licenseStatus').textContent = '✓ License Activated';
   document.getElementById('licenseStatus').className = 'license-status license-active';
   document.getElementById('licenseInputArea').style.display = 'none';
   document.getElementById('licenseActiveArea').style.display = 'block';
   document.getElementById('mainContent').classList.add('visible');
+  
+  // Show uses count if available
+  const usesInfo = document.getElementById('usesInfo');
+  if (usesInfo && uses !== undefined) {
+    usesInfo.textContent = `Activations used: ${uses}`;
+    usesInfo.style.display = 'block';
+  }
 }
 
 function showLicenseInactive() {
@@ -38,24 +62,51 @@ function showLicenseInactive() {
   document.getElementById('licenseInputArea').style.display = 'block';
   document.getElementById('licenseActiveArea').style.display = 'none';
   document.getElementById('mainContent').classList.remove('visible');
+  
+  const usesInfo = document.getElementById('usesInfo');
+  if (usesInfo) usesInfo.style.display = 'none';
 }
 
 // Activate button
-document.getElementById('activateBtn').addEventListener('click', () => {
-  const key = document.getElementById('licenseKeyInput').value.trim().toUpperCase();
-  if (validateLicenseKey(key)) {
-    chrome.storage.local.set({ licenseKey: key }, () => {
-      showLicenseActive(key);
+document.getElementById('activateBtn').addEventListener('click', async () => {
+  const key = document.getElementById('licenseKeyInput').value.trim();
+  const btn = document.getElementById('activateBtn');
+  
+  if (!key) {
+    alert('Please enter a license key');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  
+  const result = await verifyWithGumroad(key);
+  
+  if (result.success) {
+    // Store license info locally for offline use
+    chrome.storage.local.set({ 
+      licenseKey: key,
+      licenseVerified: true,
+      licenseUses: result.uses,
+      purchaseEmail: result.purchase?.email || ''
+    }, () => {
+      showLicenseActive(key, result.uses);
     });
   } else {
-    alert('Invalid license key. Format: IRWCMS-XXXX-XXXX-XXXX');
+    let errorMsg = 'Invalid license key';
+    if (result.message) {
+      errorMsg = result.message;
+    }
+    alert(errorMsg);
+    btn.disabled = false;
+    btn.textContent = 'Activate License';
   }
 });
 
 // Deactivate button
 document.getElementById('deactivateBtn').addEventListener('click', () => {
   if (confirm('Are you sure you want to deactivate your license?')) {
-    chrome.storage.local.remove(['licenseKey'], () => {
+    chrome.storage.local.remove(['licenseKey', 'licenseVerified', 'licenseUses', 'purchaseEmail'], () => {
       showLicenseInactive();
       document.getElementById('licenseKeyInput').value = '';
     });
