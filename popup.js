@@ -113,3 +113,25 @@ function renderPreview(data) {
   
   previewContainer.style.display = data.length ? 'block' : 'none';
 }
+
+// Download template functionality
+document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+  const headers = ['Particulars', 'N1', 'N2', 'N3', 'K', 'Sign', 'L', 'B', 'H'];
+  const sampleData = [
+    ['Foundation excavation', '2', '1', '1', '1', '+', '10.5', '3.0', '1.5'],
+    ['Backfill work', '1', '1', '1', '1', '+', '8.0', '2.5', '1.0']
+  ];
+  
+  const csvContent = [
+    headers.join(','),
+    ...sampleData.map(row => row.join(','))
+  ].join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'irwcms_template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});

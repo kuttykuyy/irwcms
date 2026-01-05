@@ -120,6 +120,19 @@
       border: 1px solid #ddd;
       border-radius: 4px;
     }
+    .template-btn {
+      margin-top: 10px;
+      background: #ff9800;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .template-btn:hover {
+      background: #e68900;
+    }
   </style>
 </head>
 <body>
@@ -133,6 +146,7 @@
       Columns: Particulars, N1, N2, N3, K, Sign, L, B, H<br>
       <em>(Sign = "+" or "-")</em>
     </div>
+    <button id="downloadTemplateBtn" class="template-btn">📥 Download Template</button>
   </div>
   
   <div id="rowCount"></div>

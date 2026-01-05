@@ -9,6 +9,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function fillFormRows(data) {
+  console.log('IRWCMS Auto-Fill: Starting to fill', data.length, 'rows');
+  
   // Check if any row needs coefficient (has K or Sign)
   const needsCoefficient = data.some(row => 
     (row.K !== undefined && row.K !== null && row.K !== '') ||
@@ -17,110 +19,149 @@ async function fillFormRows(data) {
   
   // Check the "Use Coefficient" checkbox if needed
   if (needsCoefficient) {
-    const coeffCheckbox = document.querySelector('input[type="checkbox"]');
+    console.log('IRWCMS Auto-Fill: Enabling coefficient checkbox');
+    // Look for checkbox near "Use Coefficient" text
     const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
     const useCoeffCheckbox = checkboxes.find(cb => {
-      const label = cb.nextSibling?.textContent || cb.parentElement?.textContent || '';
-      return label.toLowerCase().includes('coefficient') || label.toLowerCase().includes('coeff');
-    }) || coeffCheckbox;
+      const parent = cb.closest('div, label, td') || cb.parentElement;
+      const text = parent?.textContent || '';
+      return text.toLowerCase().includes('coefficient') || text.toLowerCase().includes('coeff');
+    });
     
     if (useCoeffCheckbox && !useCoeffCheckbox.checked) {
       useCoeffCheckbox.click();
-      await delay(200);
+      await delay(300);
+      console.log('IRWCMS Auto-Fill: Coefficient checkbox enabled');
     }
   }
   
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
+    console.log('IRWCMS Auto-Fill: Filling row', i + 1, row);
     
-    // Click "Add row" button if not the first row (first row usually exists)
+    // Click "Add row" button if not the first row
     if (i > 0) {
-      const addRowBtn = document.querySelector('button.btn-info, button[class*="Add"], button');
-      const addRowBtns = Array.from(document.querySelectorAll('button')).filter(
-        btn => btn.textContent.toLowerCase().includes('add row') || 
-               btn.textContent.toLowerCase().includes('add')
-      );
-      
-      if (addRowBtns.length > 0) {
-        addRowBtns[0].click();
-        await delay(300);
+      const addRowBtn = findAddRowButton();
+      if (addRowBtn) {
+        addRowBtn.click();
+        await delay(400);
+        console.log('IRWCMS Auto-Fill: Added new row');
+      } else {
+        console.warn('IRWCMS Auto-Fill: Add row button not found');
       }
     }
     
-    // Get all rows in the form table
-    const tableRows = document.querySelectorAll('table tbody tr, .measurement-row, tr');
-    const lastRow = tableRows[tableRows.length - 1] || document;
+    // Get the last row in datatabody or table
+    const tbody = document.querySelector('#datatabody, #datatable tbody, table.datatable tbody');
+    const tableRows = tbody ? tbody.querySelectorAll('tr') : document.querySelectorAll('table tbody tr');
+    const lastRow = tableRows[tableRows.length - 1];
     
-    // Fill the fields - try multiple selector strategies
-    fillField(lastRow, 'Particulars', row.Particulars);
-    fillField(lastRow, 'N1', row.N1);
-    fillField(lastRow, 'N2', row.N2);
-    fillField(lastRow, 'N3', row.N3);
-    fillField(lastRow, 'K', row.K);
+    if (!lastRow) {
+      console.error('IRWCMS Auto-Fill: No row found to fill');
+      continue;
+    }
+    
+    console.log('IRWCMS Auto-Fill: Found row element', lastRow);
+    
+    // Fill the Particulars field (name="disc" or placeholder="Particulars")
+    fillParticulars(lastRow, row.Particulars);
+    
+    // Fill numeric fields in the row
+    fillNumericFields(lastRow, row);
     
     // Handle Sign (+/-) radio button
     selectSign(lastRow, row.Sign);
     
-    fillField(lastRow, 'L', row.L);
-    fillField(lastRow, 'B', row.B);
-    fillField(lastRow, 'H', row.H);
-    
-    await delay(200);
+    await delay(300);
   }
+  
+  console.log('IRWCMS Auto-Fill: Completed filling all rows');
 }
 
-function fillField(container, fieldName, value) {
+function findAddRowButton() {
+  // Strategy 1: Button with "Add row" text
+  const buttons = Array.from(document.querySelectorAll('button'));
+  let btn = buttons.find(b => b.textContent.trim().toLowerCase() === 'add row');
+  if (btn) return btn;
+  
+  // Strategy 2: Button containing "Add" with btn-info class
+  btn = buttons.find(b => 
+    b.textContent.toLowerCase().includes('add') && 
+    (b.classList.contains('btn-info') || b.classList.contains('btn-primary'))
+  );
+  if (btn) return btn;
+  
+  // Strategy 3: Any button with "add" text
+  btn = buttons.find(b => b.textContent.toLowerCase().includes('add row'));
+  return btn;
+}
+
+function fillParticulars(row, value) {
   if (value === undefined || value === null || value === '') return;
   
-  // Strategy 1: Find by placeholder
-  let input = container.querySelector(`input[placeholder*="${fieldName}" i]`);
+  // Primary: input with name="disc"
+  let input = row.querySelector('input[name="disc"]');
   
-  // Strategy 2: Find by name attribute
+  // Fallback: input with placeholder="Particulars"
   if (!input) {
-    input = container.querySelector(`input[name*="${fieldName}" i]`);
+    input = row.querySelector('input[placeholder="Particulars"]');
   }
   
-  // Strategy 3: Find by id
+  // Fallback: first text input in row
   if (!input) {
-    input = container.querySelector(`input[id*="${fieldName}" i]`);
-  }
-  
-  // Strategy 4: Find input near label with field name
-  if (!input) {
-    const labels = container.querySelectorAll('label, th, td');
-    for (const label of labels) {
-      if (label.textContent.toLowerCase().includes(fieldName.toLowerCase())) {
-        input = label.querySelector('input') || 
-                label.parentElement?.querySelector('input') ||
-                label.nextElementSibling?.querySelector('input');
-        if (input) break;
-      }
-    }
-  }
-  
-  // Strategy 5: Position-based for known fields
-  if (!input) {
-    const inputs = container.querySelectorAll('input[type="text"], input[type="number"], input:not([type])');
-    const fieldIndex = {
-      'Particulars': 0,
-      'N1': 1,
-      'N2': 2,
-      'N3': 3,
-      'K': 4,
-      'L': 5,
-      'B': 6,
-      'H': 7
-    };
-    
-    if (fieldIndex[fieldName] !== undefined && inputs[fieldIndex[fieldName]]) {
-      input = inputs[fieldIndex[fieldName]];
-    }
+    input = row.querySelector('input[type="text"], input:not([type])');
   }
   
   if (input) {
     input.value = value;
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
+    console.log('IRWCMS Auto-Fill: Filled Particulars:', value);
+  } else {
+    console.warn('IRWCMS Auto-Fill: Particulars input not found');
+  }
+}
+
+function fillNumericFields(row, data) {
+  // Get all inputs in the row, excluding radio buttons and checkboxes
+  const inputs = Array.from(row.querySelectorAll('input')).filter(inp => 
+    inp.type !== 'radio' && inp.type !== 'checkbox' && inp.type !== 'hidden'
+  );
+  
+  console.log('IRWCMS Auto-Fill: Found', inputs.length, 'inputs in row');
+  
+  // Expected order based on IRWCMS: Particulars(0), N1(1), N2(2), N3(3), K(4), L(5), B(6), H(7)
+  const fieldMap = [
+    { name: 'Particulars', index: 0 },  // Already filled separately
+    { name: 'N1', index: 1 },
+    { name: 'N2', index: 2 },
+    { name: 'N3', index: 3 },
+    { name: 'K', index: 4 },
+    { name: 'L', index: 5 },
+    { name: 'B', index: 6 },
+    { name: 'H', index: 7 }
+  ];
+  
+  for (const field of fieldMap) {
+    if (field.name === 'Particulars') continue; // Already handled
+    
+    const value = data[field.name];
+    if (value === undefined || value === null || value === '') continue;
+    
+    // Try to find by name/placeholder first
+    let input = row.querySelector(`input[name="${field.name}" i], input[placeholder="${field.name}" i]`);
+    
+    // Fallback to position
+    if (!input && inputs[field.index]) {
+      input = inputs[field.index];
+    }
+    
+    if (input) {
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log(`IRWCMS Auto-Fill: Filled ${field.name}:`, value);
+    }
   }
 }
 
@@ -128,7 +169,9 @@ function selectSign(container, sign) {
   if (!sign) return;
   
   const signValue = String(sign).trim();
-  const isPlus = signValue === '+' || signValue.toLowerCase() === 'plus';
+  const isPlus = signValue === '+' || signValue.toLowerCase() === 'plus' || signValue === '1';
+  
+  console.log('IRWCMS Auto-Fill: Setting sign to', isPlus ? '+' : '-');
   
   // Find radio buttons for +/-
   const radios = container.querySelectorAll('input[type="radio"]');
@@ -138,15 +181,15 @@ function selectSign(container, sign) {
     const value = radio.value || '';
     
     if (isPlus) {
-      // Look for + radio
       if (label.includes('+') || value === '+' || value === 'plus' || value === '1') {
         radio.click();
+        console.log('IRWCMS Auto-Fill: Selected + radio');
         return;
       }
     } else {
-      // Look for - radio
       if (label.includes('-') || value === '-' || value === 'minus' || value === '0') {
         radio.click();
+        console.log('IRWCMS Auto-Fill: Selected - radio');
         return;
       }
     }
@@ -155,6 +198,7 @@ function selectSign(container, sign) {
   // Fallback: click by position (first = +, second = -)
   if (radios.length >= 2) {
     radios[isPlus ? 0 : 1].click();
+    console.log('IRWCMS Auto-Fill: Selected radio by position');
   }
 }
 
