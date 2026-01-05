@@ -79,9 +79,11 @@ fillBtn.addEventListener('click', async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    await chrome.tabs.sendMessage(tab.id, {
-      action: 'fillForm',
-      data: parsedData
+    // Use chrome.scripting.executeScript to inject and run code directly
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: fillFormOnPage,
+      args: [parsedData]
     });
     
     showStatus(`Filled ${parsedData.length} rows!`, 'success');
@@ -89,6 +91,114 @@ fillBtn.addEventListener('click', async () => {
     showStatus('Error: ' + err.message, 'error');
   }
 });
+
+// This function will be injected into the page
+function fillFormOnPage(data) {
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+  
+  async function fillFormRows() {
+    console.log('IRWCMS Auto-Fill: Starting to fill', data.length, 'rows');
+    
+    // Check if any row needs coefficient
+    const needsCoefficient = data.some(row => 
+      (row.K !== undefined && row.K !== null && row.K !== '') ||
+      (row.Sign !== undefined && row.Sign !== null && row.Sign !== '')
+    );
+    
+    // Check the "Use Coefficient" checkbox if needed
+    if (needsCoefficient) {
+      const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+      const useCoeffCheckbox = checkboxes.find(cb => {
+        const parent = cb.closest('div, label, td') || cb.parentElement;
+        const text = parent?.textContent || '';
+        return text.toLowerCase().includes('coefficient');
+      });
+      
+      if (useCoeffCheckbox && !useCoeffCheckbox.checked) {
+        useCoeffCheckbox.click();
+        await delay(300);
+      }
+    }
+    
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      console.log('IRWCMS Auto-Fill: Filling row', i + 1, row);
+      
+      // Click "Add row" button if not the first row
+      if (i > 0) {
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const addRowBtn = buttons.find(b => 
+          b.textContent.trim().toLowerCase() === 'add row' ||
+          b.textContent.toLowerCase().includes('add row')
+        );
+        if (addRowBtn) {
+          addRowBtn.click();
+          await delay(400);
+        }
+      }
+      
+      // Get the last row in the table
+      const tbody = document.querySelector('#datatabody, #datatable tbody, table.datatable tbody');
+      const tableRows = tbody ? tbody.querySelectorAll('tr') : document.querySelectorAll('table tbody tr');
+      const lastRow = tableRows[tableRows.length - 1];
+      
+      if (!lastRow) continue;
+      
+      // Fill Particulars
+      if (row.Particulars) {
+        let input = lastRow.querySelector('input[name="disc"]') || 
+                    lastRow.querySelector('input[placeholder="Particulars"]') ||
+                    lastRow.querySelector('input[type="text"], input:not([type])');
+        if (input) {
+          input.value = row.Particulars;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      
+      // Fill numeric fields
+      const inputs = Array.from(lastRow.querySelectorAll('input')).filter(inp => 
+        inp.type !== 'radio' && inp.type !== 'checkbox' && inp.type !== 'hidden'
+      );
+      
+      const fields = ['N1', 'N2', 'N3', 'K', 'L', 'B', 'H'];
+      fields.forEach((field, idx) => {
+        const value = row[field];
+        if (value === undefined || value === null || value === '') return;
+        
+        let input = lastRow.querySelector(`input[name="${field}" i], input[placeholder="${field}" i]`);
+        if (!input && inputs[idx + 1]) input = inputs[idx + 1];
+        
+        if (input) {
+          input.value = value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      
+      // Handle Sign
+      if (row.Sign) {
+        const isPlus = String(row.Sign).trim() === '+' || row.Sign === '1';
+        const radios = lastRow.querySelectorAll('input[type="radio"]');
+        
+        for (const radio of radios) {
+          const label = radio.nextSibling?.textContent || radio.parentElement?.textContent || '';
+          if (isPlus && label.includes('+')) { radio.click(); break; }
+          if (!isPlus && label.includes('-')) { radio.click(); break; }
+        }
+        if (radios.length >= 2 && !Array.from(radios).some(r => r.checked)) {
+          radios[isPlus ? 0 : 1].click();
+        }
+      }
+      
+      await delay(300);
+    }
+    
+    console.log('IRWCMS Auto-Fill: Completed filling all rows');
+  }
+  
+  fillFormRows();
+}
 
 function showStatus(msg, type) {
   status.textContent = msg;
