@@ -1,3 +1,69 @@
+// License validation
+const LICENSE_PREFIX = 'IRWCMS-';
+const MIN_LICENSE_LENGTH = 16;
+
+// Check license on load
+document.addEventListener('DOMContentLoaded', () => {
+  checkLicense();
+});
+
+function validateLicenseKey(key) {
+  if (!key || typeof key !== 'string') return false;
+  key = key.trim().toUpperCase();
+  return key.startsWith(LICENSE_PREFIX) && key.length >= MIN_LICENSE_LENGTH;
+}
+
+function checkLicense() {
+  chrome.storage.local.get(['licenseKey'], (result) => {
+    const key = result.licenseKey;
+    if (validateLicenseKey(key)) {
+      showLicenseActive(key);
+    } else {
+      showLicenseInactive();
+    }
+  });
+}
+
+function showLicenseActive(key) {
+  document.getElementById('licenseStatus').textContent = '✓ License Activated';
+  document.getElementById('licenseStatus').className = 'license-status license-active';
+  document.getElementById('licenseInputArea').style.display = 'none';
+  document.getElementById('licenseActiveArea').style.display = 'block';
+  document.getElementById('mainContent').classList.add('visible');
+}
+
+function showLicenseInactive() {
+  document.getElementById('licenseStatus').textContent = '⚠ Not Activated';
+  document.getElementById('licenseStatus').className = 'license-status license-inactive';
+  document.getElementById('licenseInputArea').style.display = 'block';
+  document.getElementById('licenseActiveArea').style.display = 'none';
+  document.getElementById('mainContent').classList.remove('visible');
+}
+
+// Activate button
+document.getElementById('activateBtn').addEventListener('click', () => {
+  const key = document.getElementById('licenseKeyInput').value.trim().toUpperCase();
+  if (validateLicenseKey(key)) {
+    chrome.storage.local.set({ licenseKey: key }, () => {
+      showLicenseActive(key);
+    });
+  } else {
+    alert('Invalid license key. Format: IRWCMS-XXXX-XXXX-XXXX');
+  }
+});
+
+// Deactivate button
+document.getElementById('deactivateBtn').addEventListener('click', () => {
+  if (confirm('Are you sure you want to deactivate your license?')) {
+    chrome.storage.local.remove(['licenseKey'], () => {
+      showLicenseInactive();
+      document.getElementById('licenseKeyInput').value = '';
+    });
+  }
+});
+
+// ========== Original Auto-Fill Code ==========
+
 let parsedData = [];
 
 const fileInput = document.getElementById('fileInput');

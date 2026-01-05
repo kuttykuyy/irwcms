@@ -3,7 +3,7 @@
   "name": "IRWCMS Bill Measurement Auto-Fill",
   "version": "1.0",
   "description": "Auto-fill IRWCMS bill measurement forms from Excel/CSV files",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
     "https://ircep.gov.in/*"
   ],

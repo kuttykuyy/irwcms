@@ -15,6 +15,77 @@
       margin: 0 0 15px 0;
       text-align: center;
     }
+    /* License Section */
+    .license-section {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+    }
+    .license-section h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+      font-size: 14px;
+    }
+    .license-status {
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .license-active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .license-inactive {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .license-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+    }
+    .license-btn {
+      width: 100%;
+      padding: 8px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .license-btn:hover {
+      background: #218838;
+    }
+    .buy-link {
+      display: block;
+      text-align: center;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #1a73e8;
+    }
+    .deactivate-btn {
+      background: #dc3545;
+      margin-top: 8px;
+    }
+    .deactivate-btn:hover {
+      background: #c82333;
+    }
+    /* Main content */
+    .main-content {
+      display: none;
+    }
+    .main-content.visible {
+      display: block;
+    }
     .upload-area {
       border: 2px dashed #ccc;
       border-radius: 8px;
@@ -138,43 +209,60 @@
 <body>
   <h3>📋 IRWCMS Auto-Fill</h3>
   
-  <div class="upload-area">
-    <label class="upload-btn" for="fileInput">Choose Excel/CSV File</label>
-    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
-    <div id="fileName">No file selected</div>
-    <div style="font-size: 11px; color: #888; margin-top: 8px;">
-      Columns: Particulars, N1, N2, N3, K, Sign, L, B, H<br>
-      <em>(Sign = "+" or "-")</em>
+  <!-- License Section -->
+  <div class="license-section" id="licenseSection">
+    <h4>🔑 License Key</h4>
+    <div class="license-status license-inactive" id="licenseStatus">Not Activated</div>
+    <div id="licenseInputArea">
+      <input type="text" class="license-input" id="licenseKeyInput" placeholder="IRWCMS-XXXX-XXXX-XXXX">
+      <button class="license-btn" id="activateBtn">Activate License</button>
+      <a href="https://your-gumroad-link.com" target="_blank" class="buy-link">🛒 Buy License Key</a>
     </div>
-    <button id="downloadTemplateBtn" class="template-btn">📥 Download Template</button>
-  </div>
-  
-  <div id="rowCount"></div>
-  
-  <div id="previewContainer">
-    <div class="table-wrapper">
-      <table id="previewTable">
-        <thead>
-          <tr>
-            <th>Particulars</th>
-            <th>N1</th>
-            <th>N2</th>
-            <th>N3</th>
-            <th>K</th>
-            <th>Sign</th>
-            <th>L</th>
-            <th>B</th>
-            <th>H</th>
-          </tr>
-        </thead>
-        <tbody id="previewBody"></tbody>
-      </table>
+    <div id="licenseActiveArea" style="display: none;">
+      <button class="license-btn deactivate-btn" id="deactivateBtn">Deactivate License</button>
     </div>
   </div>
   
-  <button id="fillBtn" disabled>Fill Form</button>
-  
-  <div id="status"></div>
+  <!-- Main Content (hidden until license is valid) -->
+  <div class="main-content" id="mainContent">
+    <div class="upload-area">
+      <label class="upload-btn" for="fileInput">Choose Excel/CSV File</label>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+      <div id="fileName">No file selected</div>
+      <div style="font-size: 11px; color: #888; margin-top: 8px;">
+        Columns: Particulars, N1, N2, N3, K, Sign, L, B, H<br>
+        <em>(Sign = "+" or "-")</em>
+      </div>
+      <button id="downloadTemplateBtn" class="template-btn">📥 Download Template</button>
+    </div>
+    
+    <div id="rowCount"></div>
+    
+    <div id="previewContainer">
+      <div class="table-wrapper">
+        <table id="previewTable">
+          <thead>
+            <tr>
+              <th>Particulars</th>
+              <th>N1</th>
+              <th>N2</th>
+              <th>N3</th>
+              <th>K</th>
+              <th>Sign</th>
+              <th>L</th>
+              <th>B</th>
+              <th>H</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <button id="fillBtn" disabled>Fill Form</button>
+    
+    <div id="status"></div>
+  </div>
   
   <script src="xlsx.full.min.js"></script>
   <script src="popup.js"></script>
