@@ -162,18 +162,49 @@ function fillFormOnPage(data) {
       );
       
       // Form field order: [0]=Particulars, [1]=N1, [2]=N2, [3]=N3, [4]=K, [5]=L, [6]=B, [7]=H
-      // Handle Sign first (radio buttons between N3 and K)
+      // Handle Sign (radio buttons for + or -)
       if (row.Sign) {
-        const isPlus = String(row.Sign).trim() === '+' || row.Sign === '1' || row.Sign === 1;
-        const radios = lastRow.querySelectorAll('input[type="radio"]');
+        const signStr = String(row.Sign).trim();
+        const isPlus = signStr === '+' || signStr === '1' || row.Sign === 1;
+        const radios = Array.from(lastRow.querySelectorAll('input[type="radio"]'));
         
+        console.log('IRWCMS Auto-Fill: Found', radios.length, 'radio buttons in row');
+        
+        // Debug: log all radio info
+        radios.forEach((r, idx) => {
+          const parentText = r.parentElement?.textContent?.trim() || '';
+          const nextText = r.nextSibling?.textContent?.trim() || '';
+          const val = r.value;
+          console.log(`Radio ${idx}: value="${val}", parent="${parentText}", next="${nextText}"`);
+        });
+        
+        let clicked = false;
+        
+        // Strategy 1: Check value attribute
         for (const radio of radios) {
-          const label = radio.nextSibling?.textContent || radio.parentElement?.textContent || '';
-          if (isPlus && label.includes('+')) { radio.click(); break; }
-          if (!isPlus && label.includes('-')) { radio.click(); break; }
+          const val = radio.value?.trim();
+          if (isPlus && (val === '+' || val === '1' || val === 'add')) {
+            radio.click(); clicked = true; console.log('Clicked + radio by value'); break;
+          }
+          if (!isPlus && (val === '-' || val === '0' || val === 'sub' || val === 'subtract')) {
+            radio.click(); clicked = true; console.log('Clicked - radio by value'); break;
+          }
         }
-        if (radios.length >= 2 && !Array.from(radios).some(r => r.checked)) {
-          radios[isPlus ? 0 : 1].click();
+        
+        // Strategy 2: Check parent/adjacent text
+        if (!clicked) {
+          for (const radio of radios) {
+            const text = (radio.parentElement?.textContent || '') + (radio.nextSibling?.textContent || '');
+            if (isPlus && text.includes('+')) { radio.click(); clicked = true; console.log('Clicked + radio by text'); break; }
+            if (!isPlus && text.includes('-')) { radio.click(); clicked = true; console.log('Clicked - radio by text'); break; }
+          }
+        }
+        
+        // Strategy 3: Position-based (first=+, second=-)
+        if (!clicked && radios.length >= 2) {
+          const idx = isPlus ? 0 : 1;
+          radios[idx].click();
+          console.log('Clicked radio by position:', idx);
         }
       }
       
