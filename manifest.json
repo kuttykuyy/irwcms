@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "IRWCMS Bill Measurement Auto-Fill",
+  "version": "1.0",
+  "description": "Auto-fill IRWCMS bill measurement forms from Excel/CSV files",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["xlsx.full.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
