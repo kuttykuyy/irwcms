@@ -156,29 +156,15 @@ function fillFormOnPage(data) {
         }
       }
       
-      // Fill numeric fields
+      // Get all non-radio/checkbox inputs in the row
       const inputs = Array.from(lastRow.querySelectorAll('input')).filter(inp => 
         inp.type !== 'radio' && inp.type !== 'checkbox' && inp.type !== 'hidden'
       );
       
-      const fields = ['N1', 'N2', 'N3', 'K', 'L', 'B', 'H'];
-      fields.forEach((field, idx) => {
-        const value = row[field];
-        if (value === undefined || value === null || value === '') return;
-        
-        let input = lastRow.querySelector(`input[name="${field}" i], input[placeholder="${field}" i]`);
-        if (!input && inputs[idx + 1]) input = inputs[idx + 1];
-        
-        if (input) {
-          input.value = value;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
-      
-      // Handle Sign
+      // Form field order: [0]=Particulars, [1]=N1, [2]=N2, [3]=N3, [4]=K, [5]=L, [6]=B, [7]=H
+      // Handle Sign first (radio buttons between N3 and K)
       if (row.Sign) {
-        const isPlus = String(row.Sign).trim() === '+' || row.Sign === '1';
+        const isPlus = String(row.Sign).trim() === '+' || row.Sign === '1' || row.Sign === 1;
         const radios = lastRow.querySelectorAll('input[type="radio"]');
         
         for (const radio of radios) {
@@ -190,6 +176,40 @@ function fillFormOnPage(data) {
           radios[isPlus ? 0 : 1].click();
         }
       }
+      
+      // Fill N1, N2, N3 (indices 1, 2, 3)
+      ['N1', 'N2', 'N3'].forEach((field, idx) => {
+        const value = row[field];
+        if (value === undefined || value === null || value === '') return;
+        const input = inputs[idx + 1]; // +1 because index 0 is Particulars
+        if (input) {
+          input.value = value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      
+      // Fill K (coefficient) - index 4
+      if (row.K !== undefined && row.K !== null && row.K !== '') {
+        const input = inputs[4];
+        if (input) {
+          input.value = row.K;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      
+      // Fill L, B, H (indices 5, 6, 7)
+      ['L', 'B', 'H'].forEach((field, idx) => {
+        const value = row[field];
+        if (value === undefined || value === null || value === '') return;
+        const input = inputs[idx + 5]; // L=5, B=6, H=7
+        if (input) {
+          input.value = value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
       
       await delay(300);
     }
