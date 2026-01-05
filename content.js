@@ -9,6 +9,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function fillFormRows(data) {
+  // Check if any row needs coefficient (has K or Sign)
+  const needsCoefficient = data.some(row => 
+    (row.K !== undefined && row.K !== null && row.K !== '') ||
+    (row.Sign !== undefined && row.Sign !== null && row.Sign !== '')
+  );
+  
+  // Check the "Use Coefficient" checkbox if needed
+  if (needsCoefficient) {
+    const coeffCheckbox = document.querySelector('input[type="checkbox"]');
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+    const useCoeffCheckbox = checkboxes.find(cb => {
+      const label = cb.nextSibling?.textContent || cb.parentElement?.textContent || '';
+      return label.toLowerCase().includes('coefficient') || label.toLowerCase().includes('coeff');
+    }) || coeffCheckbox;
+    
+    if (useCoeffCheckbox && !useCoeffCheckbox.checked) {
+      useCoeffCheckbox.click();
+      await delay(200);
+    }
+  }
+  
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
     
