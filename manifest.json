@@ -3,38 +3,53 @@
   "name": "IRWCMS Bill Measurement Auto-Fill",
   "version": "12.1",
   "description": "Auto-fill IRWCMS bill measurement forms from Excel/CSV files",
+
   "permissions": ["activeTab", "scripting", "storage", "sidePanel"],
+
   "host_permissions": [
     "https://ircep.gov.in/*",
-    "http://ircep.gov.in/*",
     "https://*.ircep.gov.in/*",
-    "http://*.ircep.gov.in/*",
     "https://irwcms.primerp.in/*"
   ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none';"
+  },
+
   "action": {
     "default_icon": {
-      "16": "icon16.png",
-      "48": "icon48.png",
+      "16":  "icon16.png",
+      "48":  "icon48.png",
       "128": "icon128.png"
     }
   },
+
   "side_panel": {
     "default_path": "popup.html"
   },
+
   "background": {
     "service_worker": "background.js"
   },
+
   "content_scripts": [
     {
-      "matches": ["https://ircep.gov.in/*", "http://ircep.gov.in/*", "https://*.ircep.gov.in/*", "http://*.ircep.gov.in/*"],
+      "matches": [
+        "https://ircep.gov.in/*",
+        "https://*.ircep.gov.in/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],
+
   "web_accessible_resources": [
     {
       "resources": ["xlsx.full.min.js"],
-      "matches": ["https://ircep.gov.in/*", "http://ircep.gov.in/*", "https://*.ircep.gov.in/*", "http://*.ircep.gov.in/*"]
+      "matches": [
+        "https://ircep.gov.in/*",
+        "https://*.ircep.gov.in/*"
+      ]
     }
   ]
 }
