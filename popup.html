@@ -234,9 +234,11 @@
     /* ── Preview table ───────────────────────────────────────── */
     #previewContainer { margin-top: 6px; }
     .table-wrapper {
-      max-height: 120px; overflow-y: auto;
+      max-height: 150px; overflow-y: auto;
       border-radius: 7px; border: 1px solid var(--border);
-      will-change: transform; contain: strict;
+      will-change: transform;
+      /* contain:strict collapsed height to 0 (includes size containment) — use content instead */
+      contain: content;
     }
     #previewTable {
       width: 100%; border-collapse: collapse;
@@ -591,7 +593,7 @@
     </div>
 
     <!-- ── Data preview card (shown after file load) ────────── -->
-    <div id="previewContainer" style="display:none;" class="card" style="padding:10px;">
+    <div id="previewContainer" style="display:none;padding:10px;" class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div id="dataTypeIndicator" style="display:none;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;"></div>
         <div id="rowCount" style="font-size:11px;color:var(--muted);margin-left:auto;"></div>
