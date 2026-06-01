@@ -4,838 +4,631 @@
   <meta charset="UTF-8">
   <title>IRWCMS Auto-Fill</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #2563eb;
+      --blue-dk: #1d4ed8;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --amber:   #d97706;
+      --bg:      #f8fafc;
+      --card:    #ffffff;
+      --border:  #e2e8f0;
+      --text:    #1e293b;
+      --muted:   #64748b;
+      --step-bg: #eff6ff;
+    }
+
     body {
       width: 100%;
       max-width: 500px;
       min-width: 320px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ffffff;
-      min-height: 100vh;
+      background: var(--bg);
       font-size: 12px;
+      color: var(--text);
     }
-    
-    /* Header */
+
+    /* ── Header ─────────────────────────────────────────────── */
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 12px;
-      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #1e3a8a 100%);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-    }
+    .logo { display: flex; align-items: center; gap: 7px; color: white; font-weight: 700; font-size: 14px; }
     .version-badge {
-      font-size: 9px;
-      background: rgba(255,255,255,0.2);
-      padding: 2px 5px;
-      border-radius: 3px;
-      font-weight: 500;
-      margin-left: 4px;
-    }
-    /* Update Banner */
-    .update-banner {
-      display: none;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      padding: 8px 12px;
-      font-size: 11px;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .update-banner.show { display: flex; }
-    .update-banner a {
-      color: white;
-      text-decoration: underline;
-      font-weight: 600;
-    }
-    .update-close {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 0;
-      line-height: 1;
+      font-size: 9px; background: rgba(255,255,255,0.2);
+      padding: 2px 6px; border-radius: 10px; font-weight: 600;
     }
     .lang-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 4px 8px; border-radius: 5px; font-size: 11px; cursor: pointer;
     }
     .lang-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: white;
-      border-radius: 6px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      overflow: hidden;
-      z-index: 100;
-      min-width: 100px;
+      display: none; position: absolute; top: 100%; right: 0;
+      background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      overflow: hidden; z-index: 100; min-width: 130px; margin-top: 4px;
     }
     .lang-dropdown.show { display: block; }
-    .lang-option {
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 11px;
-      color: #333;
+    .lang-option { padding: 8px 12px; cursor: pointer; font-size: 11px; color: var(--text); }
+    .lang-option:hover { background: var(--step-bg); }
+    .lang-option.active { background: var(--blue); color: white; }
+
+    /* ── Update banner ───────────────────────────────────────── */
+    .update-banner {
+      display: none; background: #1d4ed8; color: white;
+      padding: 7px 12px; font-size: 11px;
+      align-items: center; justify-content: space-between; gap: 8px;
     }
-    .lang-option:hover { background: #f0f0ff; }
-    .lang-option.active { background: #2563eb; color: white; }
-    
-    /* Main Container */
-    .main { padding: 8px; }
-    
-    /* Cards */
+    .update-banner.show { display: flex; }
+    .update-banner a { color: #bfdbfe; font-weight: 600; }
+    .update-close { background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
+
+    /* ── Main scroll area ────────────────────────────────────── */
+    .main { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── Card ────────────────────────────────────────────────── */
     .card {
-      background: rgba(255,255,255,0.95);
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px;
     }
-    
-    /* License Card - Compact */
-    .license-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-    .license-header span { font-weight: 600; color: #333; }
-    
+
+    /* ── License card ────────────────────────────────────────── */
     .license-status {
-      padding: 8px 12px;
-      border-radius: 6px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 12px;
+      padding: 7px 12px; border-radius: 7px; text-align: center;
+      font-weight: 700; font-size: 12px; margin-bottom: 10px;
     }
-    .license-active {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
+    .license-active   { background: linear-gradient(135deg,#2563eb,#1d4ed8); color: white; }
+    .license-inactive { background: #dbeafe; color: #1e40af; }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;
     }
-    .license-inactive {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-    
-    /* User Info Row */
-    .user-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .user-row:last-child { border: none; }
-    .user-email { color: #374151; font-weight: 500; }
-    .user-type {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-    .type-trial { background: #fef9c3; color: #92400e; }
-    .type-paid  { background: #dcfce7; color: #166534; }
-    .type-superuser { background: #fcd34d; color: #7c2d12; }
-    
-    /* Superuser Badge */
-    .superuser-card {
-      background: linear-gradient(135deg, #bfdbfe, #2563eb);
-      border-radius: 8px;
-      padding: 8px 10px;
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .superuser-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #1f2937;
-      font-weight: 600;
-    }
-    .superuser-badge {
-      background: rgba(0,0,0,0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 9px;
-      font-weight: 700;
-    }
-    .superuser-stats {
-      display: flex;
-      gap: 10px;
-      font-size: 11px;
-      color: #1f2937;
-    }
-    .stat-item { display: flex; align-items: center; gap: 3px; }
-    
-    /* Buttons Row */
-    .btn-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .btn {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
-    .btn-success { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
-    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-    .btn-secondary { background: #e5e7eb; color: #374151; }
-    .btn-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; }
-    .btn-blue { background: #3b82f6; color: white; }
-    
-    /* Input */
     .input {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-bottom: 6px;
-      transition: border 0.15s;
+      width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 12px; margin-bottom: 6px; transition: border .15s;
+      background: var(--bg);
     }
-    .input:focus { outline: none; border-color: #2563eb; }
-    
-    /* Divider */
-    .divider {
-      text-align: center;
-      color: #9ca3af;
-      font-size: 10px;
-      margin: 8px 0;
-      position: relative;
+    .input:focus { outline: none; border-color: var(--blue); background: white; }
+    .input::placeholder { color: #94a3b8; }
+
+    .btn {
+      width: 100%; padding: 9px; border: none; border-radius: 7px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .divider::before, .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 30%;
-      height: 1px;
-      background: #e5e7eb;
+    .btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; }
+    .btn-primary  { background: linear-gradient(135deg,var(--blue),var(--blue-dk)); color: white; }
+    .btn-success  { background: linear-gradient(135deg,#16a34a,#15803d); color: white; }
+    .btn-danger   { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+    .btn-secondary{ background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-blue     { background: #3b82f6; color: white; }
+    .btn-cyan     { background: linear-gradient(135deg,#06b6d4,#0891b2); color: white; }
+    .btn-pink     { background: linear-gradient(135deg,#ec4899,#f43f5e); color: white; }
+    .btn-row { display: flex; gap: 7px; }
+    .btn-row .btn { flex: 1; }
+
+    .divider-wrap { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-text { font-size: 10px; color: var(--muted); font-weight: 600; }
+
+    .user-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px;
     }
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
-    
-    /* Tabs */
+    .user-email { color: var(--text); font-weight: 600; font-size: 11px; }
+    .user-type {
+      font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700;
+    }
+    .type-trial    { background: #fef9c3; color: #92400e; }
+    .type-paid     { background: #dcfce7; color: #166534; }
+    .type-superuser{ background: #fcd34d; color: #7c2d12; }
+
+    .superuser-card {
+      background: linear-gradient(135deg,#bfdbfe,#2563eb);
+      border-radius: 8px; padding: 8px 10px; margin: 6px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .superuser-left { display: flex; align-items: center; gap: 6px; color: #1f2937; font-weight: 700; font-size: 12px; }
+    .superuser-badge { background: rgba(0,0,0,.15); padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 700; }
+    .superuser-stats { display: flex; gap: 12px; font-size: 11px; color: #1f2937; }
+
+    /* ── Step indicator ──────────────────────────────────────── */
+    .step-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--blue); color: white;
+      font-weight: 800; font-size: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-num.done { background: var(--green); }
+    .step-num.warn { background: var(--amber); }
+    .step-title { font-weight: 700; font-size: 13px; color: var(--text); }
+    .step-sub   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    /* ── Instruction box ─────────────────────────────────────── */
+    .instruction-box {
+      background: var(--step-bg); border: 1px solid #bfdbfe;
+      border-radius: 8px; padding: 9px 11px; margin-bottom: 8px;
+    }
+    .instruction-box .inst-title {
+      font-weight: 700; font-size: 11px; color: var(--blue); margin-bottom: 4px;
+    }
+    .instruction-box ol, .instruction-box ul {
+      padding-left: 16px; color: var(--muted); font-size: 11px; line-height: 1.7;
+    }
+    .instruction-box li strong { color: var(--text); }
+
+    /* ── Quota display ───────────────────────────────────────── */
+    .credits-bar {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0;
+    }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
     .tabs {
-      display: flex;
-      background: #f3f4f6;
-      border-radius: 6px;
-      padding: 3px;
-      margin-bottom: 8px;
+      display: flex; background: var(--bg); border-radius: 7px;
+      padding: 3px; margin-bottom: 10px; border: 1px solid var(--border);
     }
     .tab {
-      flex: 1;
-      padding: 6px;
-      text-align: center;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      color: #6b7280;
-      transition: all 0.15s;
+      flex: 1; padding: 6px; text-align: center; border-radius: 5px;
+      cursor: pointer; font-size: 11px; font-weight: 600; color: var(--muted);
+      transition: all .15s;
     }
-    .tab.active {
-      background: white;
-      color: #2563eb;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
+    .tab.active { background: white; color: var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    
-    /* File Upload Compact */
-    .upload-area {
-      border: 1.5px dashed #c7d2fe;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-      background: #f8fafc;
+
+    /* ── Upload area ─────────────────────────────────────────── */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: 8px;
+      padding: 12px; text-align: center; cursor: pointer;
+      transition: all .15s; margin-bottom: 8px; background: var(--bg);
     }
+    .upload-zone:hover { border-color: var(--blue); background: var(--step-bg); }
     .upload-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--blue); color: white;
+      padding: 7px 16px; border-radius: 6px; font-size: 11px;
+      font-weight: 600; cursor: pointer; margin-bottom: 6px;
     }
+    .upload-btn:hover { background: var(--blue-dk); }
+    input[type="file"] { display: none; }
     .file-name {
-      color: #6b7280;
-      font-size: 11px;
-      margin-top: 6px;
+      font-size: 11px; color: var(--muted); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
     }
     .file-hint {
-      color: #9ca3af;
-      font-size: 10px;
-      margin-top: 6px;
-      line-height: 1.4;
+      font-size: 10px; color: #94a3b8; margin-top: 4px;
     }
-    input[type="file"] { display: none; }
-    
-    /* Cloud Section */
-    .cloud-section {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid #e5e7eb;
-    }
-    .cloud-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #374151;
-    }
+
+    /* ── Select ──────────────────────────────────────────────── */
     .select {
-      width: 100%;
-      padding: 8px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 11px;
-      margin-bottom: 6px;
-      background: white;
+      width: 100%; padding: 7px 10px; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 11px; background: var(--bg);
+      margin-bottom: 6px; color: var(--text);
     }
-    
-    /* Quick Links */
-    .quick-links {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
+    .select:focus { outline: none; border-color: var(--blue); }
+
+    /* ── Quick links ─────────────────────────────────────────── */
+    .quick-link-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 7px; border-radius: 7px; font-size: 11px; font-weight: 600;
+      text-decoration: none; background: linear-gradient(135deg,#7c3aed,#6d28d9);
+      color: white; margin-top: 6px; transition: filter .15s;
     }
-    .quick-link {
-      flex: 1;
-      padding: 8px;
-      border-radius: 6px;
-      text-align: center;
-      text-decoration: none;
-      font-size: 10px;
-      font-weight: 600;
-      color: white;
+    .quick-link-btn:hover { filter: brightness(1.1); }
+
+    /* ── Row count / data type ───────────────────────────────── */
+    #rowCount { font-size: 11px; text-align: center; color: var(--muted); }
+    #dataTypeIndicator {
+      display: none; padding: 4px 10px; margin-bottom: 6px;
+      border-radius: 6px; font-size: 10px; font-weight: 700; text-align: center;
     }
-    .link-purple { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-    .link-pink { background: linear-gradient(135deg, #ec4899, #f43f5e); }
-    
-    /* Preview Table */
-    #previewContainer { display: none; margin: 8px 0; }
+
+    /* ── Preview table ───────────────────────────────────────── */
+    #previewContainer { margin-top: 6px; }
     .table-wrapper {
-      max-height: 120px;
-      overflow-y: auto;
-      border-radius: 6px;
-      border: 1px solid #e5e7eb;
-      /* Promote scroller to its own compositor layer — prevents main-thread repaints during scroll */
-      will-change: transform;
-      contain: strict;
+      max-height: 120px; overflow-y: auto;
+      border-radius: 7px; border: 1px solid var(--border);
+      will-change: transform; contain: strict;
     }
     #previewTable {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      table-layout: fixed;
-      /* Hint browser to skip off-screen row layout — large preview tables render faster */
+      width: 100%; border-collapse: collapse;
+      font-size: 10px; table-layout: fixed;
       content-visibility: auto;
     }
     #previewTable th {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      padding: 5px 2px;
-      position: sticky;
-      top: 0;
-      font-weight: 600;
-      font-size: 10px;
+      background: linear-gradient(135deg,var(--blue),var(--blue-dk));
+      color: white; padding: 5px 3px; position: sticky; top: 0;
+      font-weight: 700; font-size: 9px; text-align: center;
     }
     #previewTable td {
-      padding: 4px 2px;
-      border-bottom: 1px solid #f3f4f6;
-      text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      padding: 4px 3px; border-bottom: 1px solid var(--border);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-align: center; max-width: 80px;
     }
-    /* Column widths: Particulars(22%), N1-N3+K+Sign(6% each=30%), L+B+H(16% each=48%) */
-    #previewTable th:nth-child(1), #previewTable td:nth-child(1) { width: 22%; text-align: left; }
-    #previewTable th:nth-child(2), #previewTable td:nth-child(2),
-    #previewTable th:nth-child(3), #previewTable td:nth-child(3),
-    #previewTable th:nth-child(4), #previewTable td:nth-child(4),
-    #previewTable th:nth-child(5), #previewTable td:nth-child(5),
-    #previewTable th:nth-child(6), #previewTable td:nth-child(6) { width: 6%; }
-    #previewTable th:nth-child(7), #previewTable td:nth-child(7),
-    #previewTable th:nth-child(8), #previewTable td:nth-child(8),
-    #previewTable th:nth-child(9), #previewTable td:nth-child(9) { width: 16%; font-weight: 500; }
-    
-    /* Speed Control Compact */
-    .speed-section {
-      background: #eff6ff;
-      border-radius: 8px;
-      padding: 8px 10px;
-      margin: 8px 0;
-    }
-    .speed-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-    .speed-label { font-size: 11px; color: #1e40af; font-weight: 500; }
-    .speed-value { font-weight: 700; color: #2563eb; font-size: 11px; }
-    .speed-slider {
-      width: 100%;
-      height: 6px;
-      -webkit-appearance: none;
-      background: linear-gradient(90deg, #2563eb, #0ea5e9);
-      border-radius: 3px;
-      outline: none;
-    }
-    .speed-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      background: white;
-      border: 2px solid #2563eb;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    }
-    .speed-hints {
-      display: flex;
-      justify-content: space-between;
-      font-size: 9px;
-      color: #1e40af;
-      margin-top: 4px;
-    }
-    
-    /* Append Mode */
+    #previewTable tr:nth-child(even) td { background: var(--bg); }
+
+    /* ── Append mode ─────────────────────────────────────────── */
     #appendModeSection {
-      display: none;
-      background: #eff6ff;
-      border: 1px solid #86efac;
-      border-radius: 8px;
-      padding: 8px;
-      margin: 8px 0;
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 8px; padding: 10px; margin-top: 6px;
     }
     .append-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
     }
-    .append-title { font-weight: 600; color: #1e40af; font-size: 11px; }
+    .append-title { font-weight: 700; font-size: 11px; color: #92400e; }
     .append-count {
-      background: #2563eb;
-      color: white;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 10px;
+      background: var(--amber); color: white;
+      padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 11px;
     }
-    
-    /* Status */
-    #status {
-      margin-top: 8px;
-      padding: 8px;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 11px;
-      display: none;
-    }
-    .success { background: #d1fae5; color: #1e40af; }
-    .error { background: #fee2e2; color: #991b1b; }
-    .info { background: #dbeafe; color: #1e40af; }
-    
-    /* Row Count */
-    #rowCount { text-align: center; margin: 8px 0; font-size: 11px; }
-    
-    /* Data Type Indicator */
-    #dataTypeIndicator {
-      display: none;
-      padding: 4px 8px;
+    #fillModeHint { font-size: 10px; color: var(--muted); margin-top: 5px; text-align: center; }
+
+    /* ── Speed control ───────────────────────────────────────── */
+    .speed-section { padding: 2px 0; }
+    .speed-header {
+      display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 600;
-      text-align: center;
     }
-    
-    /* Tour Styles */
-    .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9998; display: none; }
+    .speed-label { font-weight: 600; font-size: 11px; color: var(--text); }
+    .speed-value {
+      font-weight: 700; font-size: 11px; color: var(--blue);
+      background: var(--step-bg); padding: 2px 8px; border-radius: 10px;
+    }
+    .speed-slider {
+      width: 100%; height: 4px; -webkit-appearance: none;
+      background: linear-gradient(90deg,var(--blue) 0%,#bfdbfe 100%);
+      border-radius: 4px; outline: none; cursor: pointer;
+    }
+    .speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--blue); cursor: pointer;
+      box-shadow: 0 1px 4px rgba(37,99,235,.4);
+    }
+    .speed-hints {
+      display: flex; justify-content: space-between;
+      font-size: 9px; color: var(--muted); margin-top: 4px;
+    }
+    .speed-tip {
+      background: #f1f5f9; border-radius: 6px; padding: 5px 8px;
+      font-size: 10px; color: var(--muted); margin-top: 5px; line-height: 1.5;
+    }
+
+    /* ── Fill button ─────────────────────────────────────────── */
+    #fillBtn {
+      padding: 12px; font-size: 14px; font-weight: 800;
+      letter-spacing: .02em; border-radius: 9px;
+    }
+    #fillBtn:not(:disabled) {
+      box-shadow: 0 4px 14px rgba(22,163,74,.4);
+      animation: pulse-green 2.5s infinite;
+    }
+    @keyframes pulse-green {
+      0%,100% { box-shadow: 0 4px 14px rgba(22,163,74,.4); }
+      50%      { box-shadow: 0 4px 22px rgba(22,163,74,.7); }
+    }
+
+    /* ── Status message ──────────────────────────────────────── */
+    #status {
+      display: none; margin-top: 8px; padding: 8px 12px;
+      border-radius: 8px; font-size: 11px; font-weight: 600;
+      text-align: center; line-height: 1.5;
+    }
+    .success { background: #dcfce7; color: var(--green); }
+    .error   { background: #fee2e2; color: var(--red); }
+    .info    { background: #dbeafe; color: var(--blue); }
+
+    /* ── Tour ────────────────────────────────────────────────── */
+    .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 9998; display: none; }
     .tour-overlay.active { display: block; }
     .tour-highlight { position: relative; z-index: 9999 !important; box-shadow: 0 0 0 3px #bfdbfe !important; border-radius: 8px; }
     .tour-tooltip {
-      position: fixed;
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      max-width: 260px;
-      z-index: 10000;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      position: fixed; background: white; border-radius: 12px;
+      padding: 16px; max-width: 260px; z-index: 10000;
+      box-shadow: 0 8px 30px rgba(0,0,0,.25);
     }
     .tour-step-indicator { display: flex; justify-content: center; gap: 4px; margin-bottom: 10px; }
     .tour-step-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; }
-    .tour-step-dot.active { background: #2563eb; transform: scale(1.3); }
-    .tour-step-dot.completed { background: #2563eb; }
-    .tour-emoji { font-size: 32px; text-align: center; margin-bottom: 8px; }
-    .tour-title { font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; color: #1f2937; }
-    .tour-description { font-size: 11px; color: #6b7280; line-height: 1.5; text-align: center; margin-bottom: 12px; }
-    .tour-buttons { display: flex; gap: 6px; }
-    .tour-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
-    .tour-btn-skip { background: #f3f4f6; color: #6b7280; }
-    .tour-btn-next { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
-    .tour-btn-prev { background: #e5e7eb; color: #374151; }
-    .tour-progress { height: 3px; background: #e5e7eb; border-radius: 2px; margin-top: 10px; overflow: hidden; }
-    .tour-progress-fill { height: 100%; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .tour-step-dot.active    { background: var(--blue); transform: scale(1.3); }
+    .tour-step-dot.completed { background: var(--blue); }
+    .tour-emoji       { font-size: 30px; text-align: center; margin-bottom: 8px; }
+    .tour-title       { font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+    .tour-description { font-size: 11px; color: var(--muted); line-height: 1.5; text-align: center; margin-bottom: 12px; }
+    .tour-buttons     { display: flex; gap: 6px; }
+    .tour-btn         { flex: 1; padding: 7px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .tour-btn-skip    { background: #f3f4f6; color: var(--muted); }
+    .tour-btn-next    { background: linear-gradient(135deg,var(--blue),var(--blue-dk)); color: white; }
+    .tour-btn-prev    { background: #e5e7eb; color: var(--text); }
+    .tour-progress    { height: 3px; background: #e5e7eb; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+    .tour-progress-fill { height: 100%; background: linear-gradient(135deg,var(--blue),var(--blue-dk)); }
+    .tour-feature-list { list-style: none; padding: 0; }
+    .tour-feature-list li { padding: 3px 0; font-size: 11px; color: var(--muted); }
+    .tour-feature-list li::before { content: '✓ '; color: var(--green); font-weight: 700; }
     .tour-start-btn {
-      position: fixed;
-      bottom: 12px;
-      right: 12px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #bfdbfe, #2563eb);
-      border: none;
-      cursor: pointer;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(251,191,36,0.4);
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; bottom: 12px; right: 12px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg,var(--blue),var(--blue-dk));
+      color: white; border: none; font-size: 14px; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(37,99,235,.4); z-index: 100;
     }
-    .tour-welcome-title {
-      font-size: 18px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .tour-feature-list { list-style: none; margin: 10px 0; text-align: left; }
-    .tour-feature-list li { padding: 4px 0; font-size: 11px; color: #6b7280; }
-    .tour-feature-list li::before { content: '✓'; color: #2563eb; margin-right: 6px; }
-    
-    /* Credits Display */
-    .credits-bar {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      border-radius: 8px;
-      padding: 8px 10px;
-      color: white;
-      margin-bottom: 8px;
-    }
-    .credits-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .credits-label { font-size: 10px; opacity: 0.9; }
-    .credits-value { font-size: 14px; font-weight: 700; }
-    
-    /* Hidden */
-    .hidden { display: none !important; }
-    .main-content { display: none; }
-    .main-content.visible { display: block; }
-    
-    /* Buy Link */
-    .buy-link {
-      display: block;
-      text-align: center;
-      color: #2563eb;
-      font-size: 11px;
-      text-decoration: none;
-      margin-top: 8px;
-    }
-    .buy-link:hover { text-decoration: underline; }
-    
-    /* Login Page Sections */
-    .login-section {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #e5e7eb;
-    }
-    .section-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 8px;
-    }
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0;
-    }
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #d1d5db, transparent);
-    }
-    .divider-text {
-      font-size: 10px;
-      font-weight: 600;
-      color: #9ca3af;
-      padding: 0 4px;
-    }
-    .buy-section {
-      text-align: center;
-      padding: 8px 0;
-    }
-    .buy-link-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #1d4ed8, #2563eb);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(99,102,241,0.3);
-    }
-    .buy-link-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(99,102,241,0.4);
-    }
-    
-    /* Content Section Dividers */
+
+    /* ── Content divider ─────────────────────────────────────── */
     .content-divider {
       height: 1px;
-      background: linear-gradient(90deg, transparent 0%, #d1d5db 20%, #d1d5db 80%, transparent 100%);
-      margin: 10px 0;
+      background: linear-gradient(90deg,transparent,var(--border) 20%,var(--border) 80%,transparent);
+      margin: 2px 0;
     }
+
+    /* ── Buy link ────────────────────────────────────────────── */
+    .buy-link-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: linear-gradient(135deg,var(--blue),var(--blue-dk));
+      color: white; padding: 9px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; text-decoration: none; margin-top: 4px;
+      box-shadow: 0 2px 8px rgba(37,99,235,.3); transition: filter .15s;
+    }
+    .buy-link-btn:hover { filter: brightness(1.08); }
+
+    /* ── Main content visibility ─────────────────────────────── */
+    .main-content { display: none; }
+    .main-content.visible { display: flex; flex-direction: column; gap: 10px; }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">
-      <span>📋</span>
-      <span data-i18n="appTitle">IRWCMS Auto-Fill</span>
-      <span class="version-badge" id="versionBadge">v12.1</span>
-    </div>
-    <div class="lang-selector" id="langSelector" style="position:relative;">
-      <button class="lang-btn" id="currentLangBtn">
-        <span id="currentLang">EN</span> ▾
-      </button>
-      <div class="lang-dropdown" id="langDropdown">
-        <div class="lang-option" data-lang="en">🇬🇧 English</div>
-        <div class="lang-option" data-lang="hi">🇮🇳 हिंदी</div>
-        <div class="lang-option" data-lang="ta">🇮🇳 தமிழ்</div>
-        <div class="lang-option" data-lang="kn">🇮🇳 ಕನ್ನಡ</div>
-        <div class="lang-option" data-lang="te">🇮🇳 తెలుగు</div>
-      </div>
+
+<!-- ── Header ──────────────────────────────────────────────── -->
+<div class="header">
+  <div class="logo">
+    <span>📋</span>
+    <span data-i18n="appTitle">IRWCMS Auto-Fill</span>
+    <span class="version-badge" id="versionBadge">v12.1</span>
+  </div>
+  <div class="lang-selector" id="langSelector" style="position:relative;">
+    <button class="lang-btn" id="currentLangBtn"><span id="currentLang">EN</span> ▾</button>
+    <div class="lang-dropdown" id="langDropdown">
+      <div class="lang-option" data-lang="en">🇬🇧 English</div>
+      <div class="lang-option" data-lang="hi">🇮🇳 हिंदी</div>
+      <div class="lang-option" data-lang="ta">🇮🇳 தமிழ்</div>
+      <div class="lang-option" data-lang="kn">🇮🇳 ಕನ್ನಡ</div>
+      <div class="lang-option" data-lang="te">🇮🇳 తెలుగు</div>
     </div>
   </div>
-  
-  <!-- Update Banner (hidden by default) -->
-  <div class="update-banner" id="updateBanner">
-    <div>⚠️ <span id="updateMessage">New version available!</span> <a href="https://irwcms.primerp.in" target="_blank" id="updateLink">Update Now</a></div>
-    <button class="update-close" id="updateClose">✕</button>
+</div>
+
+<!-- ── Update Banner ────────────────────────────────────────── -->
+<div class="update-banner" id="updateBanner">
+  <div>🆕 <span id="updateMessage">New version available!</span>
+    <a href="https://irwcms.primerp.in" target="_blank" id="updateLink">Update Now →</a>
   </div>
-  
-  <div class="main">
-    <!-- License Section -->
-    <div class="card" id="licenseSection">
-      <div class="license-status license-inactive" id="licenseStatus" data-i18n="notActivated">Not Activated</div>
-      
-      <div id="licenseInputArea">
-        <!-- Email Login Section -->
-        <div class="login-section">
-          <div class="section-label">📧 Email Login</div>
-          <input type="email" class="input" id="emailInput" placeholder="Enter registered email">
-          <button class="btn btn-success" id="activateBtn" data-i18n="loginWithEmail">Login with Email</button>
-        </div>
-        
-        <div class="section-divider">
-          <span class="divider-line"></span>
-          <span class="divider-text">OR</span>
-          <span class="divider-line"></span>
-        </div>
-        
-        <!-- License Key Section -->
-        <div class="login-section">
-          <div class="section-label">🔑 License Key</div>
-          <input type="text" class="input" id="licenseKeyInput" placeholder="IRWCMS-XXXX-XXXX-XXXX">
-          <button class="btn btn-primary" id="activateKeyBtn" data-i18n="activateWithKey">Activate with Key</button>
-        </div>
-        
-        <div class="section-divider" style="margin-top:12px;">
-          <span class="divider-line"></span>
-        </div>
-        
-        <!-- Buy Section -->
-        <div class="buy-section">
-          <a href="https://irwcms.primerp.in/buy" target="_blank" class="buy-link-btn">
-            🛒 Buy License Key
-          </a>
-        </div>
+  <button class="update-close" id="updateClose">✕</button>
+</div>
+
+<div class="main">
+
+  <!-- ── STEP 0: License ──────────────────────────────────────── -->
+  <div class="card" id="licenseSection">
+    <div class="license-status license-inactive" id="licenseStatus" data-i18n="notActivated">Not Activated</div>
+
+    <!-- Login form (shown when not activated) -->
+    <div id="licenseInputArea">
+      <div class="instruction-box">
+        <div class="inst-title">🔐 First time? Login to activate</div>
+        <ul>
+          <li>Enter your <strong>registered email</strong> and click Login</li>
+          <li>Or enter a <strong>License Key</strong> if you have one</li>
+          <li>No account? <strong>Buy a license</strong> below</li>
+        </ul>
       </div>
-      
-      <div id="licenseActiveArea" style="display:none;">
-        <div class="user-row">
-          <span class="user-email" id="userEmail">●</span>
-          <span class="user-type type-trial" id="licenseType">TRIAL</span>
-        </div>
-        <div id="contractorNameDisplay" style="display:none;font-size:10px;color:#6b7280;padding:4px 0;"></div>
-        <div id="usesInfo" style="display:none;"></div>
-        
-        <!-- Superuser Badge -->
-        <div class="superuser-card" id="superuserBadge" style="display:none;">
-          <div class="superuser-left">
-            <span>⭐</span>
-            <span>SUPERUSER</span>
-            <span class="superuser-badge">No Limits</span>
-          </div>
-          <div class="superuser-stats">
-            <div class="stat-item"><span>📅</span> <span id="todayFills">0</span></div>
-            <div class="stat-item"><span>📊</span> <span id="totalFills">0</span></div>
-          </div>
-        </div>
-        
-        <div class="btn-row">
-          <button class="btn btn-blue" id="refreshBtn">🔄 Refresh</button>
-          <button class="btn btn-danger" id="deactivateBtn">Logout</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-      <!-- Credits Display -->
-      <div class="credits-bar" id="quotaDisplay" style="display:none;">
-        <div class="credits-row">
-          <span class="credits-label">Credits</span>
-          <span class="credits-value" id="creditBalance">₹0</span>
-        </div>
-      </div>
-      
-      <a href="https://irwcms.primerp.in/credits" target="_blank" id="buyCreditsFixed" style="display:none;text-decoration:none;">
-        <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;padding:8px;border-radius:6px;text-align:center;font-weight:600;font-size:11px;margin-bottom:8px;">
-          💳 Buy Credits
-        </div>
+
+      <div class="section-label">📧 Email Login</div>
+      <input type="email" class="input" id="emailInput" placeholder="your@email.com">
+      <button class="btn btn-primary" id="activateBtn" data-i18n="loginWithEmail">🔑 Login with Email</button>
+
+      <div class="divider-wrap"><span class="divider-line"></span><span class="divider-text">OR</span><span class="divider-line"></span></div>
+
+      <div class="section-label">🔑 License Key</div>
+      <input type="text" class="input" id="licenseKeyInput" placeholder="IRWCMS-XXXX-XXXX-XXXX">
+      <button class="btn btn-secondary" id="activateKeyBtn" data-i18n="activateWithKey">Activate with Key</button>
+
+      <a href="https://irwcms.primerp.in/buy" target="_blank" class="buy-link-btn" style="margin-top:10px;">
+        🛒 Buy License Key
       </a>
-      
-      <!-- Section Divider -->
-      <div class="content-divider"></div>
-      
-      <!-- Data Source Card -->
-      <div class="card">
-        <div class="tabs">
-          <div class="tab active" data-tab="upload">📁 Upload</div>
-          <div class="tab" data-tab="cloud">☁️ Cloud</div>
+    </div>
+
+    <!-- Active license info -->
+    <div id="licenseActiveArea" style="display:none;">
+      <div class="user-row">
+        <span class="user-email" id="userEmail">●</span>
+        <span class="user-type type-trial" id="licenseType">TRIAL</span>
+      </div>
+      <div id="contractorNameDisplay" style="display:none;font-size:10px;color:var(--muted);padding:3px 0;"></div>
+      <div id="usesInfo" style="display:none;"></div>
+
+      <div class="superuser-card" id="superuserBadge" style="display:none;">
+        <div class="superuser-left">
+          <span>⭐</span><span>SUPERUSER</span>
+          <span class="superuser-badge">No Limits</span>
         </div>
-        
-        <!-- Upload Tab -->
-        <div class="tab-content active" id="tab-upload">
-          <div class="upload-area">
-            <label class="upload-btn" for="fileInput">📁 Choose File</label>
-            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div class="file-name" id="fileName" style="flex:1;">No file selected</div>
-              <button id="clearFileBtn" style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;" title="Clear file">✕</button>
-            </div>
-            <div class="file-hint">Columns: Particulars, N1, N2, N3, K, Sign, L, B, H</div>
+        <div class="superuser-stats">
+          <div>📅 <span id="todayFills">0</span></div>
+          <div>📊 <span id="totalFills">0</span></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-blue" id="refreshBtn">🔄 Refresh</button>
+        <button class="btn btn-danger" id="deactivateBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main content (visible after activation) ──────────────── -->
+  <div class="main-content" id="mainContent">
+
+    <!-- Credits Display -->
+    <div id="quotaDisplay" style="display:none;"></div>
+
+    <a href="https://irwcms.primerp.in/credits" target="_blank" id="buyCreditsFixed"
+       style="display:none;text-decoration:none;">
+      <button class="btn btn-primary" style="font-size:11px;">💳 Add Credits to Account</button>
+    </a>
+
+    <!-- ── STEP 1: Open the form ─────────────────────────────── -->
+    <div class="card">
+      <div class="step-header">
+        <div class="step-num" id="step1num">1</div>
+        <div>
+          <div class="step-title">Open IRWCMS Measurement Form</div>
+          <div class="step-sub">Go to the item row and open the measurement entry form</div>
+        </div>
+      </div>
+      <div class="instruction-box">
+        <div class="inst-title">📌 How to open the form</div>
+        <ol>
+          <li>Login to <strong>ircep.gov.in</strong></li>
+          <li>Go to your bill → click on an <strong>item row</strong></li>
+          <li>Open the form — you should see <strong>"Add Row"</strong> button</li>
+          <li>Come back here and proceed to Step 2</li>
+        </ol>
+      </div>
+      <div id="irwcmsDebug"></div>
+    </div>
+
+    <!-- ── STEP 2: Load your data ────────────────────────────── -->
+    <div class="card">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Load Your Measurement Data</div>
+          <div class="step-sub">Upload Excel/CSV or load from Measurement Builder</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="upload">📁 Upload Excel</div>
+        <div class="tab" data-tab="cloud">☁️ Cloud (Builder)</div>
+      </div>
+
+      <!-- Upload Tab -->
+      <div class="tab-content active" id="tab-upload">
+        <div class="instruction-box">
+          <div class="inst-title">📋 Required columns in your Excel file</div>
+          <ul>
+            <li><strong>Particulars</strong> — description of work item</li>
+            <li><strong>N1, N2, N3</strong> — number of items (use 1 if not needed)</li>
+            <li><strong>L, B, H</strong> — Length, Breadth, Height (in metres)</li>
+            <li><strong>Sign</strong> — use <strong>+</strong> or <strong>−</strong></li>
+            <li>K (coefficient) — optional</li>
+          </ul>
+        </div>
+
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+          <label class="upload-btn" for="fileInput">📁 Choose File</label>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px;">
+            <div class="file-name" id="fileName">No file selected</div>
+            <button id="clearFileBtn" style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;">✕</button>
           </div>
-          <button id="downloadTemplateBtn" class="btn btn-secondary" style="margin-top:8px;background:linear-gradient(135deg,#ec4899,#f43f5e);color:white;">📥 Download Template</button>
+          <div class="file-hint">Supports .xlsx · .xls · .csv</div>
         </div>
-        
-        <!-- Cloud Tab -->
-        <div class="tab-content" id="tab-cloud">
-          <div id="cloudDataSection" style="display:none;">
-            <select class="select" id="cloudFileSelect">
-              <option value="">Select saved file...</option>
+
+        <button id="downloadTemplateBtn" class="btn btn-pink">
+          📥 Download Ready-to-Use Template
+        </button>
+      </div>
+
+      <!-- Cloud Tab -->
+      <div class="tab-content" id="tab-cloud">
+        <div class="instruction-box">
+          <div class="inst-title">☁️ Load from Measurement Builder</div>
+          <ul>
+            <li>Build measurements at <strong>irwcms.primerp.in/measurement-builder</strong></li>
+            <li>Measurements are auto-saved to your account</li>
+            <li>Click <strong>Fetch Saved Files</strong> to load them here</li>
+          </ul>
+        </div>
+
+        <div id="cloudDataSection" style="display:none;">
+          <select class="select" id="cloudFileSelect">
+            <option value="">— Select a saved file —</option>
+          </select>
+          <div id="cloudSheetSelect" style="display:none;">
+            <select class="select" id="cloudSheetSelector">
+              <option value="">— Select a sheet —</option>
             </select>
-            <div id="cloudSheetSelect" style="display:none;">
-              <select class="select" id="cloudSheetSelector">
-                <option value="">Select sheet...</option>
-              </select>
-            </div>
-            <div class="btn-row">
-              <button id="loadCloudDataBtn" class="btn btn-primary" disabled>📥 Load Sheet</button>
-              <button id="resetCloudBtn" class="btn btn-danger" style="flex:0.3;">🔄</button>
-            </div>
           </div>
-          <button id="fetchCloudDataBtn" class="btn btn-cyan">🔄 Fetch Saved Files</button>
-          <div id="cloudStatus" style="font-size:10px;color:#6b7280;text-align:center;margin-top:6px;"></div>
+          <div class="btn-row">
+            <button id="loadCloudDataBtn" class="btn btn-primary" disabled>📥 Load Sheet</button>
+            <button id="resetCloudBtn" class="btn btn-secondary" style="flex:0.3;" title="Reset">↺</button>
+          </div>
         </div>
-        
-        <!-- Quick Links -->
-        <div class="quick-links">
-          <a href="https://irwcms.primerp.in/measurement-builder" target="_blank" class="quick-link link-purple">📊 Measurement Builder</a>
+
+        <button id="fetchCloudDataBtn" class="btn btn-cyan">🔄 Fetch My Saved Files</button>
+        <div id="cloudStatus" style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px;"></div>
+
+        <a href="https://irwcms.primerp.in/measurement-builder" target="_blank" class="quick-link-btn">
+          📊 Open Measurement Builder
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Data preview ──────────────────────────────────────── -->
+    <div id="rowCount"></div>
+
+    <div id="previewContainer" style="display:none;">
+      <div id="dataTypeIndicator"></div>
+      <div class="table-wrapper">
+        <table id="previewTable">
+          <thead id="previewHeader">
+            <tr>
+              <th>Particulars</th><th>N1</th><th>N2</th><th>N3</th>
+              <th>K</th><th>Sign</th><th>L</th><th>B</th><th>H</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Append mode (shown when existing rows detected) -->
+    <div id="appendModeSection" style="display:none;">
+      <div class="append-header">
+        <span class="append-title">⚠️ Existing rows detected</span>
+        <span class="append-count" id="existingRowCount">0</span>
+      </div>
+      <div class="instruction-box" style="margin-bottom:8px;">
+        <div class="inst-title">What would you like to do?</div>
+        <ul>
+          <li><strong>Append</strong> — add your rows <em>after</em> the existing ones</li>
+          <li><strong>Replace</strong> — fill from row 1 (existing rows unchanged)</li>
+        </ul>
+      </div>
+      <div class="btn-row">
+        <button id="appendModeBtn" class="btn btn-success" style="font-size:11px;">➕ Append After Existing</button>
+        <button id="replaceModeBtn" class="btn btn-secondary" style="font-size:11px;">🔄 Fill from Row 1</button>
+      </div>
+      <p id="fillModeHint" style="font-size:10px;color:var(--muted);margin-top:5px;text-align:center;">
+        Appending after row <span id="appendAfterRow">0</span>
+      </p>
+    </div>
+
+    <!-- ── STEP 3: Fill ──────────────────────────────────────── -->
+    <div class="card">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Set Speed &amp; Fill the Form</div>
+          <div class="step-sub">Make sure the IRWCMS form is open in the active tab</div>
         </div>
       </div>
-      
-      <!-- Section Divider -->
-      <div class="content-divider"></div>
-      
-      <!-- Row Count -->
-      <div id="rowCount"></div>
-      
-      <!-- Preview -->
-      <div id="previewContainer">
-        <div id="dataTypeIndicator"></div>
-        <div class="table-wrapper">
-          <table id="previewTable">
-            <thead id="previewHeader">
-              <tr>
-                <th>Particulars</th>
-                <th>N1</th>
-                <th>N2</th>
-                <th>N3</th>
-                <th>K</th>
-                <th>Sign</th>
-                <th>L</th>
-                <th>B</th>
-                <th>H</th>
-              </tr>
-            </thead>
-            <tbody id="previewBody"></tbody>
-          </table>
-        </div>
-      </div>
-      
-      <!-- Append Mode -->
-      <div id="appendModeSection">
-        <div class="append-header">
-          <span class="append-title">📋 Existing Rows Detected</span>
-          <span class="append-count" id="existingRowCount">0</span>
-        </div>
-        <div class="btn-row">
-          <button id="appendModeBtn" class="btn btn-success" style="font-size:10px;">➕ Append</button>
-          <button id="replaceModeBtn" class="btn" style="background:#2563eb;color:white;font-size:10px;">🔄 Replace</button>
-        </div>
-        <p id="fillModeHint" style="font-size:9px;color:#6b7280;margin-top:6px;text-align:center;">
-          Append adds after row <span id="appendAfterRow">0</span>
-        </p>
-      </div>
-      
-      <!-- Section Divider -->
-      <div class="content-divider"></div>
-      
-      <!-- Speed Control -->
+
       <div class="speed-section">
         <div class="speed-header">
           <span class="speed-label">⚡ Fill Speed</span>
@@ -843,31 +636,38 @@
         </div>
         <input type="range" class="speed-slider" id="speedSlider" min="1" max="6" value="3">
         <div class="speed-hints">
-          <span>🐢 Slow</span>
+          <span>🐢 Slow (stable)</span>
           <span>⚡ Instant</span>
         </div>
+        <div class="speed-tip">
+          💡 <strong>Slow</strong> — use on older computers or slow internet.<br>
+          <strong>Medium</strong> — recommended for most users.<br>
+          <strong>Instant</strong> — fastest, for bulk operations.
+        </div>
       </div>
-      
-      <!-- Section Divider -->
-      <div class="content-divider"></div>
-      
-      <!-- Fill Button -->
-      <div class="btn-row">
-        <button id="fillBtn" class="btn btn-success" disabled>▶ Fill Form</button>
+
+      <div style="margin-top:12px;" class="btn-row">
+        <button id="fillBtn" class="btn btn-success" disabled>▶ Fill Form Now</button>
         <button id="stopFillBtn" class="btn btn-danger" style="display:none;flex:0.4;">⏹ Stop</button>
       </div>
-      
+
       <div id="status"></div>
+
+      <div style="margin-top:8px;padding:6px 10px;background:#f8fafc;border-radius:6px;font-size:10px;color:var(--muted);line-height:1.6;">
+        ⚠️ <strong>Before filling:</strong> Make sure the IRWCMS measurement form page is open and you can see the <em>"Add Row"</em> button on it.
+      </div>
     </div>
-  </div>
-  
-  <!-- Tour Elements -->
-  <div class="tour-overlay" id="tourOverlay"></div>
-  <div class="tour-tooltip" id="tourTooltip" style="display:none;"></div>
-  <button class="tour-start-btn" id="tourStartBtn" title="Help">❓</button>
-  
-  <script src="xlsx.full.min.js"></script>
-  <script src="translations.js"></script>
-  <script src="popup.js"></script>
+
+  </div><!-- end main-content -->
+</div><!-- end main -->
+
+<!-- Tour Elements -->
+<div class="tour-overlay" id="tourOverlay"></div>
+<div class="tour-tooltip" id="tourTooltip" style="display:none;"></div>
+<button class="tour-start-btn" id="tourStartBtn" title="Help / Tour">❓</button>
+
+<script src="xlsx.full.min.js"></script>
+<script src="translations.js"></script>
+<script src="popup.js"></script>
 </body>
 </html>
