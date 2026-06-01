@@ -156,6 +156,14 @@ export function showLicenseActive(key: string, uses: number): void {
 
     if (usesEl) usesEl.style.display = 'none';
     updateExcelAccessForTrial(isTrial && !isSuperuser);
+
+    // Superuser badge — set directly here because updateCreditsDisplay
+    // may have already run before this async callback completed
+    const badge = document.getElementById('superuserBadge') as HTMLElement | null;
+    if (badge) badge.style.display = isSuperuser ? 'flex' : 'none';
+
+    // Re-run updateCreditsDisplay now that we know the account type
+    if (r.usageData) updateCreditsDisplay(r.usageData as UsageData);
   });
 }
 

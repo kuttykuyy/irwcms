@@ -87,7 +87,7 @@ function showSheetSelector(sheetNames: string[], onSheetLoaded: () => void): voi
   container.innerHTML = `<div style="font-weight:bold;margin-bottom:8px;color:#2e7d32;">📋 Select Sheet (${sheetNames.length} found)</div>
     <div id="sheetButtons" style="display:flex;flex-direction:column;gap:5px;max-height:150px;overflow-y:auto;"></div>`;
 
-  const anchor = document.querySelector('.file-label')?.parentElement ?? fileInput().parentElement;
+  const anchor = document.querySelector('.file-label, .upload-btn')?.closest('.tab-content, .upload-area, div') ?? fileInput().parentElement;
   anchor?.after(container);
 
   const btnContainer = container.querySelector('#sheetButtons')!;

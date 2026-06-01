@@ -537,12 +537,15 @@
           </ul>
         </div>
 
-        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-          <label class="upload-btn" for="fileInput">📁 Choose File</label>
+        <div class="upload-zone">
+          <!-- file-label class kept for JS anchor detection -->
+          <label class="upload-btn file-label" for="fileInput">📁 Choose File</label>
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
           <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px;">
             <div class="file-name" id="fileName">No file selected</div>
-            <button id="clearFileBtn" style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;">✕</button>
+            <!-- stopPropagation prevents upload-zone click from reopening file dialog -->
+            <button id="clearFileBtn" onclick="event.stopPropagation()"
+              style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;">✕</button>
           </div>
           <div class="file-hint">Supports .xlsx · .xls · .csv</div>
         </div>
@@ -587,11 +590,12 @@
       </div>
     </div>
 
-    <!-- ── Data preview ──────────────────────────────────────── -->
-    <div id="rowCount"></div>
-
-    <div id="previewContainer" style="display:none;">
-      <div id="dataTypeIndicator"></div>
+    <!-- ── Data preview card (shown after file load) ────────── -->
+    <div id="previewContainer" style="display:none;" class="card" style="padding:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div id="dataTypeIndicator" style="display:none;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;"></div>
+        <div id="rowCount" style="font-size:11px;color:var(--muted);margin-left:auto;"></div>
+      </div>
       <div class="table-wrapper">
         <table id="previewTable">
           <thead id="previewHeader">
