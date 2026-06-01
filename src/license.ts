@@ -104,12 +104,23 @@ export function buildUsageData(r: ServerResponse): UsageData {
 // ── Local license state ───────────────────────────────────────
 
 export function checkLicense(): void {
-  chrome.storage.local.get(['licenseKey', 'licenseVerified', 'licenseUses', 'usageData', 'creditBalance'], result => {
-    const r = result as StoredLicense;
+  // Read is_superuser at top level too — older extension versions stored it
+  // there but NOT inside usageData, causing the superuser badge to not show.
+  chrome.storage.local.get(['licenseKey', 'licenseVerified', 'licenseUses', 'usageData', 'creditBalance', 'is_superuser'], result => {
+    const r = result as StoredLicense & { is_superuser?: boolean };
     if (r.licenseVerified && r.licenseKey) {
       showLicenseActive(r.licenseKey, r.licenseUses ?? 0);
-      if (r.usageData)       updateCreditsDisplay(r.usageData);
-      else if (r.creditBalance !== undefined) updateCreditsDisplay(r.creditBalance);
+      if (r.usageData) {
+        // Merge top-level is_superuser into usageData in case it was stored
+        // by an older extension version that didn't include it in usageData
+        const merged: UsageData = {
+          ...r.usageData,
+          is_superuser: r.usageData.is_superuser || r.is_superuser || false,
+        };
+        updateCreditsDisplay(merged);
+      } else if (r.creditBalance !== undefined) {
+        updateCreditsDisplay(r.creditBalance);
+      }
     } else {
       showLicenseInactive();
     }
@@ -162,8 +173,10 @@ export function showLicenseActive(key: string, uses: number): void {
     const badge = document.getElementById('superuserBadge') as HTMLElement | null;
     if (badge) badge.style.display = isSuperuser ? 'flex' : 'none';
 
-    // Re-run updateCreditsDisplay now that we know the account type
-    if (r.usageData) updateCreditsDisplay(r.usageData as UsageData);
+    // Re-run updateCreditsDisplay with merged is_superuser
+    if (r.usageData) {
+      updateCreditsDisplay({ ...r.usageData as UsageData, is_superuser: isSuperuser });
+    }
   });
 }
 
