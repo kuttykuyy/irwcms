@@ -59,6 +59,15 @@ async function runFill(fillBtn: HTMLButtonElement, stopBtn: HTMLButtonElement): 
   if (!stored.licenseKey || !stored.deviceId) { showStatus('License not activated', 'error'); return; }
   if (!tab?.id) { showStatus('No active tab found', 'error'); return; }
 
+  // Guard: must be on IRWCMS page for the content script to be available
+  if (!isIrwcmsUrl(tab.url)) {
+    showStatus(
+      '⚠️ Please switch to the IRWCMS tab (ircep.gov.in) before filling.',
+      'error'
+    );
+    return;
+  }
+
   // ── 1. Extract page info via content bridge ──────────────────
   let pageInfo: PageInfo = {};
   let detectionError: string | undefined;
@@ -176,7 +185,17 @@ async function runFill(fillBtn: HTMLButtonElement, stopBtn: HTMLButtonElement): 
     const duration = ((Date.now() - fillStartTime) / 1000).toFixed(1);
     markSheetFilled(result, effectiveType, duration);
   } catch (err: any) {
-    showStatus('Error: ' + err.message, 'error');
+    const msg: string = err?.message ?? '';
+    if (msg.includes('Receiving end does not exist') || msg.includes('Could not establish connection')) {
+      showStatus(
+        '⚠️ Cannot reach the IRWCMS page. Please refresh the IRWCMS tab (press F5) and try again.',
+        'error'
+      );
+    } else if (msg.includes('No tab with id')) {
+      showStatus('⚠️ The IRWCMS tab was closed. Please reopen it and try again.', 'error');
+    } else {
+      showStatus('❌ ' + msg, 'error');
+    }
   } finally {
     fillBtn.disabled = false; fillBtn.textContent = 'Fill Form';
     stopBtn.style.display = 'none';
