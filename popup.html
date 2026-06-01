@@ -200,8 +200,9 @@
 
     /* ── Data type indicator + row count ──────────── */
     #dataTypeIndicator {
-      display: none; padding: 3px 8px; margin-bottom: 5px;
+      display: none; padding: 3px 8px;
       border-radius: 5px; font-size: 10px; font-weight: 700; text-align: center;
+      width: 100%;
     }
 
     /* ── Preview table ─────────────────────────────── */
@@ -498,10 +499,8 @@
 
     <!-- Preview (shown after file load) ─────────────────────── -->
     <div id="previewContainer" style="display:none;" class="card">
-      <div class="preview-header-row">
-        <div id="dataTypeIndicator"></div>
-        <div id="rowCount"></div>
-      </div>
+      <div id="dataTypeIndicator" style="margin-bottom:3px;"></div>
+      <div id="rowCount" style="margin-bottom:5px;"></div>
       <div class="table-wrapper">
         <table id="previewTable">
           <thead id="previewHeader">
