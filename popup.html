@@ -463,17 +463,25 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-blue" id="refreshBtn">🔄 Refresh</button>
         <button class="btn btn-danger" id="deactivateBtn">Logout</button>
       </div>
+      <!-- Hidden refresh button kept for JS compatibility — triggered by icon below -->
+      <button id="refreshBtn" style="display:none;"></button>
     </div>
   </div>
 
   <!-- ── Main content (visible after activation) ──────────────── -->
   <div class="main-content" id="mainContent">
 
-    <!-- Credits Display -->
-    <div id="quotaDisplay" style="display:none;"></div>
+    <!-- Credits Display with inline refresh icon -->
+    <div style="position:relative;">
+      <div id="quotaDisplay" style="display:none;"></div>
+      <button id="refreshIconBtn" title="Refresh balance"
+        style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;
+               color:#94a3b8;font-size:14px;padding:2px 4px;border-radius:4px;line-height:1;
+               display:none;"
+        onclick="document.getElementById('refreshBtn').click()">⟳</button>
+    </div>
 
     <a href="https://irwcms.primerp.in/credits" target="_blank" id="buyCreditsFixed"
        style="display:none;text-decoration:none;">
@@ -669,5 +677,15 @@
 <script src="xlsx.full.min.js"></script>
 <script src="translations.js"></script>
 <script src="popup.js"></script>
+<script>
+  // Show refresh icon whenever quotaDisplay becomes visible
+  const _qd = document.getElementById('quotaDisplay');
+  const _ri = document.getElementById('refreshIconBtn');
+  if (_qd && _ri) {
+    new MutationObserver(() => {
+      _ri.style.display = _qd.style.display === 'none' ? 'none' : 'block';
+    }).observe(_qd, { attributes: true, attributeFilter: ['style'] });
+  }
+</script>
 </body>
 </html>
