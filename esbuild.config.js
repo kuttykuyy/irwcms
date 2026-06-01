@@ -11,6 +11,7 @@ if (!fs.existsSync('dist')) fs.mkdirSync('dist', { recursive: true });
 
 // Copy static assets into dist/ (manifest references these by filename)
 const STATIC = [
+  'index.html',       // Landing page — Vercel serves this at /
   'manifest.json',
   'popup.html',
   'background.js',
