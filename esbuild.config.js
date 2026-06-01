@@ -13,6 +13,7 @@ if (!fs.existsSync('dist')) fs.mkdirSync('dist', { recursive: true });
 const STATIC = [
   'manifest.json',
   'popup.html',
+  'background.js',
   'translations.js',
   'xlsx.full.min.js',
   'icon16.png',

@@ -4,5 +4,6 @@
 node_modules/
 .DS_Store
 Thumbs.db
-dist/
+# dist/ is committed so Chrome can load the extension without a build step
+# *.js.map files are excluded (only generated in --watch mode)
 *.js.map
