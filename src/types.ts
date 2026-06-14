@@ -97,6 +97,7 @@ export interface ServerResponse extends Partial<UsageData> {
   verified_contractor?: string;
   email_verified?: boolean;
   verified_email?: string;
+  verification_required?: boolean;
   contractor_name_duplicate?: boolean;
   trial_restriction?: boolean;
   need_onboarding?: boolean;

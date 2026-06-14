@@ -59,6 +59,14 @@ export async function verifyWithServer(licenseKey: string, includeSession = fals
   return data;
 }
 
+export async function sendEmailCode(email: string): Promise<ServerResponse> {
+  return post('/api/verify-email/send', { email, purpose: 'login' });
+}
+
+export async function checkEmailCode(email: string, code: string): Promise<ServerResponse> {
+  return post('/api/verify-email/check', { email, code });
+}
+
 export async function loginWithEmail(email: string): Promise<ServerResponse> {
   const deviceId = await getDeviceId();
   const { sessionToken } = await chrome.storage.local.get(['sessionToken']) as { sessionToken?: string };
@@ -219,13 +227,57 @@ export function updateExcelAccessForTrial(isTrial: boolean): void {
 
 export function initLicenseButtons(): void {
 
-  // Email login
+  // Email login - step 1: send a verification code to the entered email
+  const resetEmailLoginUI = () => {
+    const emailInput = document.getElementById('emailInput') as HTMLInputElement;
+    const activateBtn = document.getElementById('activateBtn') as HTMLButtonElement;
+    const codeArea   = document.getElementById('emailCodeArea') as HTMLElement;
+    const codeInput  = document.getElementById('emailCodeInput') as HTMLInputElement;
+    const verifyBtn  = document.getElementById('verifyEmailCodeBtn') as HTMLButtonElement;
+
+    emailInput.disabled = false;
+    activateBtn.style.display = '';
+    activateBtn.disabled = false; activateBtn.textContent = '🔑 Login with Email';
+    codeArea.style.display = 'none';
+    codeInput.value = '';
+    verifyBtn.disabled = false; verifyBtn.textContent = '✅ Verify & Login';
+  };
+
   document.getElementById('activateBtn')?.addEventListener('click', async () => {
     const emailInput = document.getElementById('emailInput') as HTMLInputElement;
     const btn        = document.getElementById('activateBtn') as HTMLButtonElement;
     const email = emailInput.value.trim();
     if (!email) { alert('Please enter your email'); return; }
-    btn.disabled = true; btn.textContent = 'Logging in…';
+    btn.disabled = true; btn.textContent = 'Sending code…';
+
+    const result = await sendEmailCode(email);
+    if (result.success) {
+      emailInput.disabled = true;
+      btn.style.display = 'none';
+      document.getElementById('emailCodeArea')!.style.display = 'block';
+      (document.getElementById('emailCodeInput') as HTMLInputElement)?.focus();
+    } else {
+      alert(result.message ?? 'Failed to send verification code');
+    }
+    btn.disabled = false; btn.textContent = '🔑 Login with Email';
+  });
+
+  // Email login - step 2: verify the code, then activate via /api/verify-email/login
+  document.getElementById('verifyEmailCodeBtn')?.addEventListener('click', async () => {
+    const emailInput = document.getElementById('emailInput') as HTMLInputElement;
+    const codeInput  = document.getElementById('emailCodeInput') as HTMLInputElement;
+    const btn        = document.getElementById('verifyEmailCodeBtn') as HTMLButtonElement;
+    const email = emailInput.value.trim();
+    const code  = codeInput.value.trim();
+    if (!code) { alert('Please enter the code from your email'); return; }
+    btn.disabled = true; btn.textContent = 'Verifying…';
+
+    const checkResult = await checkEmailCode(email, code);
+    if (!checkResult.success) {
+      alert(checkResult.message ?? 'Invalid code');
+      btn.disabled = false; btn.textContent = '✅ Verify & Login';
+      return;
+    }
 
     const result = await loginWithEmail(email);
     if (result.success) {
@@ -239,11 +291,15 @@ export function initLicenseButtons(): void {
       showLicenseActive(result.license_key!, result.activations_used ?? 0);
       updateCreditsDisplay(usageData);
       initSpeedControl(result.is_personal);
+      resetEmailLoginUI();
     } else {
       alert(result.message ?? 'No license found for this email');
+      btn.disabled = false; btn.textContent = '✅ Verify & Login';
     }
-    btn.disabled = false; btn.textContent = 'Login with Email';
   });
+
+  // Email login - cancel: go back to entering a different email
+  document.getElementById('cancelEmailCodeBtn')?.addEventListener('click', resetEmailLoginUI);
 
   // License key activation
   document.getElementById('activateKeyBtn')?.addEventListener('click', async () => {
@@ -334,6 +390,7 @@ export function initLicenseButtons(): void {
         showLicenseInactive();
         (document.getElementById('emailInput') as HTMLInputElement).value = '';
         (document.getElementById('licenseKeyInput') as HTMLInputElement).value = '';
+        resetEmailLoginUI();
         btn.disabled = false; btn.textContent = 'Deactivate License';
       }
     );
