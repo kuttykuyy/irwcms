@@ -19,17 +19,21 @@
       --muted:   #64748b;
     }
 
+    html, body {
+      height: 100%;
+    }
+
     body {
-      width: 100%;
-      max-width: 500px;
+      width: 390px;
+      max-width: 100vw;
       min-width: 320px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
       font-size: 12px;
       color: var(--text);
       /* No scroll — everything fits */
       overflow: hidden;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
@@ -73,18 +77,22 @@
 
     /* ── Scrollable body ──────────────────────────── */
     .main {
-      flex: 1;
+      flex: 1 1 auto;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 8px 10px;
       display: flex;
       flex-direction: column;
       gap: 7px;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
     }
 
     /* ── Card ──────────────────────────────────────── */
     .card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 8px; padding: 9px 10px;
+      min-width: 0;
+      max-width: 100%;
     }
 
     /* ── License card ─────────────────────────────── */
@@ -116,6 +124,8 @@
       width: 100%; padding: 8px; border: none; border-radius: 6px;
       font-size: 11px; font-weight: 600; cursor: pointer; transition: all .12s;
       display: flex; align-items: center; justify-content: center; gap: 5px;
+      min-width: 0;
+      white-space: nowrap;
     }
     .btn:hover:not(:disabled) { filter: brightness(1.08); }
     .btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -126,7 +136,7 @@
     .btn-blue      { background: #3b82f6; color: white; }
     .btn-cyan      { background: linear-gradient(135deg,#06b6d4,#0891b2); color: white; }
     .btn-pink      { background: linear-gradient(135deg,#ec4899,#f43f5e); color: white; }
-    .btn-row { display: flex; gap: 6px; }
+    .btn-row { display: flex; gap: 6px; min-width: 0; }
     .btn-row .btn { flex: 1; }
 
     .user-row {
@@ -165,6 +175,7 @@
     /* ── Upload zone ──────────────────────────────── */
     .upload-row {
       display: flex; align-items: center; gap: 7px; margin-bottom: 5px;
+      min-width: 0;
     }
     .upload-btn {
       display: inline-flex; align-items: center; gap: 5px;
@@ -206,29 +217,107 @@
     }
 
     /* ── Preview table ─────────────────────────────── */
-    #previewContainer { padding: 8px 10px; }
+    #previewContainer {
+      padding: 10px 12px;
+      flex-shrink: 0;
+      cursor: zoom-in;
+    }
+    #previewContainer.preview-expanded {
+      position: fixed;
+      inset: 8px;
+      z-index: 10001;
+      max-width: none;
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: column;
+      cursor: default;
+      box-shadow: 0 12px 40px rgba(15,23,42,.35);
+    }
+    body.preview-expanded-active::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15,23,42,.55);
+    }
+    .preview-close-btn {
+      display: none;
+      border: none;
+      background: #ef4444;
+      color: white;
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #previewContainer.preview-expanded .preview-close-btn { display: inline-flex; }
+    .preview-expand-hint {
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+    #previewContainer.preview-expanded .preview-expand-hint { display: none; }
     .preview-header-row {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 5px;
     }
-    #rowCount { font-size: 10px; color: var(--muted); }
+    #rowCount { font-size: 11px; color: var(--muted); font-weight: 600; }
     .table-wrapper {
-      max-height: 110px; overflow-y: auto;
+      max-height: min(46vh, 360px);
+      overflow: auto;
       border-radius: 6px; border: 1px solid var(--border);
+      background: white;
+      max-width: 100%;
+    }
+    #previewContainer.preview-expanded .table-wrapper {
+      flex: 1;
+      max-height: none;
     }
     #previewTable {
-      width: 100%; border-collapse: collapse;
-      font-size: 10px; table-layout: fixed;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      table-layout: fixed;
     }
     #previewTable th {
       background: linear-gradient(135deg,var(--blue),var(--blue-dk));
       color: white; padding: 4px 2px; position: sticky; top: 0;
-      font-weight: 700; font-size: 9px; text-align: center;
+      z-index: 2;
+      font-weight: 700; font-size: 10px; text-align: center;
     }
     #previewTable td {
-      padding: 3px 2px; border-bottom: 1px solid var(--border);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-align: center; max-width: 70px;
+      padding: 5px 4px; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    #previewTable th:first-child,
+    #previewTable td:first-child {
+      width: 42%;
+      text-align: left;
+      white-space: nowrap;
+    }
+    #previewContainer.preview-expanded #previewTable {
+      width: max-content;
+      min-width: 100%;
+      font-size: 11px;
+      table-layout: auto;
+    }
+    #previewContainer.preview-expanded #previewTable td {
+      padding: 6px 7px;
+      overflow: visible;
+      text-overflow: clip;
+      min-width: 52px;
+    }
+    #previewContainer.preview-expanded #previewTable th:first-child,
+    #previewContainer.preview-expanded #previewTable td:first-child {
+      min-width: 220px;
+      max-width: 360px;
+      width: auto;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
     #previewTable tr:nth-child(even) td { background: var(--bg); }
 
@@ -250,6 +339,7 @@
     /* ── Speed control ─────────────────────────────── */
     .speed-row {
       display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+      min-width: 0;
     }
     .speed-label { font-weight: 600; font-size: 11px; color: var(--text); white-space: nowrap; }
     .speed-value {
@@ -257,7 +347,7 @@
       background: #eff6ff; padding: 2px 7px; border-radius: 8px; white-space: nowrap;
     }
     .speed-slider {
-      flex: 1; height: 4px; -webkit-appearance: none;
+      flex: 1 1 auto; min-width: 0; height: 4px; -webkit-appearance: none;
       background: linear-gradient(90deg,var(--blue) 0%,#bfdbfe 100%);
       border-radius: 4px; outline: none; cursor: pointer;
     }
@@ -275,6 +365,8 @@
     #fillBtn {
       padding: 11px; font-size: 13px; font-weight: 800;
       border-radius: 8px; letter-spacing: .01em;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     #fillBtn:not(:disabled) {
       box-shadow: 0 3px 12px rgba(22,163,74,.4);
@@ -352,7 +444,14 @@
 
     /* ── Main content visibility ──────────────────── */
     .main-content { display: none; }
-    .main-content.visible { display: contents; }
+    .main-content.visible {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+    .main-content.visible > .card:last-of-type {
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
@@ -427,7 +526,7 @@
     <!-- Balance + refresh icon -->
     <div style="position:relative;">
       <div id="quotaDisplay" style="display:none;"></div>
-      <button id="refreshIconBtn" title="Sync balance" onclick="document.getElementById('refreshBtn').click()"
+      <button id="refreshIconBtn" title="Sync balance"
         style="position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;
                color:#94a3b8;font-size:13px;padding:2px 4px;border-radius:3px;display:none;">⟳</button>
     </div>
@@ -465,7 +564,7 @@
           <label class="upload-btn file-label" for="fileInput">📁 Choose File</label>
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
           <div class="file-name" id="fileName">No file selected</div>
-          <button id="clearFileBtn" onclick="event.stopPropagation()"
+          <button id="clearFileBtn"
             style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;
                    padding:3px 7px;font-size:10px;cursor:pointer;flex-shrink:0;">✕</button>
         </div>
@@ -499,6 +598,10 @@
 
     <!-- Preview (shown after file load) ─────────────────────── -->
     <div id="previewContainer" style="display:none;" class="card">
+      <div class="preview-header-row">
+        <span class="preview-expand-hint">Click preview to enlarge</span>
+        <button id="previewCloseBtn" class="preview-close-btn" type="button">Close</button>
+      </div>
       <div id="dataTypeIndicator" style="margin-bottom:3px;"></div>
       <div id="rowCount" style="margin-bottom:5px;"></div>
       <div class="table-wrapper">
@@ -562,14 +665,5 @@
 <script src="xlsx.full.min.js"></script>
 <script src="translations.js"></script>
 <script src="popup.js"></script>
-<script>
-  const _qd = document.getElementById('quotaDisplay');
-  const _ri = document.getElementById('refreshIconBtn');
-  if (_qd && _ri) {
-    new MutationObserver(() => {
-      _ri.style.display = _qd.style.display === 'none' ? 'none' : 'block';
-    }).observe(_qd, { attributes: true, attributeFilter: ['style'] });
-  }
-</script>
 </body>
 </html>

@@ -13,6 +13,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*", "content.ts", "tests/**/*"],
+  "include": ["src/**/*", "content.ts"],
   "exclude": ["node_modules", "dist"]
 }

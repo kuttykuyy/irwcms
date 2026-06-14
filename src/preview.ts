@@ -302,3 +302,30 @@ export function initTemplateDownload(): void {
     XLSX.writeFile(wb, 'irwcms_template.xlsx');
   });
 }
+
+export function initPreviewExpand(): void {
+  const container = document.getElementById('previewContainer');
+  const closeBtn = document.getElementById('previewCloseBtn');
+  if (!container) return;
+
+  const close = () => {
+    container.classList.remove('preview-expanded');
+    document.body.classList.remove('preview-expanded-active');
+  };
+
+  container.addEventListener('click', event => {
+    if ((event.target as HTMLElement).closest('#previewCloseBtn')) return;
+    if (container.style.display === 'none') return;
+    container.classList.add('preview-expanded');
+    document.body.classList.add('preview-expanded-active');
+  });
+
+  closeBtn?.addEventListener('click', event => {
+    event.stopPropagation();
+    close();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') close();
+  });
+}
