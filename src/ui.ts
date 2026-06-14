@@ -184,16 +184,13 @@ function ensureCreditsPanelDOM(quotaEl: HTMLElement): void {
   if (_creditsPanelReady) return;
   quotaEl.innerHTML = `
     <div id="cp-wrap" style="background:#f8fafc;padding:12px;border-radius:8px;margin-bottom:8px;font-size:13px;border:1px solid #e2e8f0;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span style="color:#334155;font-weight:600;">Account Balance:</span>
-        <span id="cp-balance" style="font-weight:bold;font-size:16px;">₹0</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="color:#334155;font-weight:600;">Plan:</span>
+        <span style="font-weight:bold;color:#16a34a;">♾️ Unlimited Fills</span>
       </div>
-      <div style="display:flex;justify-content:space-between;color:#475569;margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;color:#475569;">
         <span>📅 Today: <strong id="cp-today">0</strong></span>
         <span>📊 Total: <strong id="cp-total">0</strong></span>
-      </div>
-      <div style="text-align:center;color:#6d28d9;font-size:10px;line-height:1.4;">
-        ₹1/fill (1-500) → ₹0.50 (501-5,000) → ₹0.20 (5,001+)
       </div>
       <div id="cp-trial"></div>
     </div>`;
@@ -214,7 +211,7 @@ export function updateCreditsDisplay(data: UsageData | number): void {
     return;
   }
 
-  const { is_superuser, is_unlimited, is_personal, fills_this_cycle, today_fills, credit_balance,
+  const { is_superuser, is_unlimited, fills_this_cycle, today_fills,
           is_trial, trial_active, trial_days_remaining } = data;
 
   if (is_superuser) {
@@ -236,12 +233,8 @@ export function updateCreditsDisplay(data: UsageData | number): void {
 
   ensureCreditsPanelDOM(quotaEl);
 
-  const balance = credit_balance || 0;
-  const balanceColor = balance >= 250 ? '#16a34a' : balance > 0 ? '#d97706' : '#dc2626';
-  const cpBalance = document.getElementById('cp-balance');
-  const cpToday   = document.getElementById('cp-today');
-  const cpTotal   = document.getElementById('cp-total');
-  if (cpBalance) { cpBalance.style.color = balanceColor; cpBalance.textContent = `₹${balance.toLocaleString()}`; }
+  const cpToday = document.getElementById('cp-today');
+  const cpTotal = document.getElementById('cp-total');
   if (cpToday) cpToday.textContent = (today_fills || 0).toLocaleString();
   if (cpTotal) cpTotal.textContent = (fills_this_cycle || 0).toLocaleString();
 
@@ -265,7 +258,7 @@ export function updateCreditsDisplay(data: UsageData | number): void {
   }
 
   const buyBtn = document.getElementById('buyCreditsFixed') as HTMLElement | null;
-  if (buyBtn) buyBtn.style.display = (is_unlimited && is_personal) ? 'none' : 'block';
+  if (buyBtn) buyBtn.style.display = is_unlimited ? 'none' : 'block';
 }
 
 // ── Version / update banner ────────────────────────────────────

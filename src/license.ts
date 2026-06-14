@@ -76,29 +76,27 @@ export async function loginWithEmail(email: string): Promise<ServerResponse> {
 // ── Build usageData object from server response ───────────────
 
 export function buildUsageData(r: ServerResponse): UsageData {
-  return {
+  const usageData: UsageData = {
     is_unlimited:            r.is_unlimited          ?? false,
     is_personal:             r.is_personal           ?? true,
     is_railway:              r.is_railway            ?? false,
     is_superuser:            r.is_superuser          ?? false,
-    cycle_spend:             r.cycle_spend,
     fills_this_cycle:        r.fills_this_cycle      ?? 0,
     today_fills:             r.today_fills           ?? 0,
-    annual_cap:              r.annual_cap,
-    cycle_end:               r.cycle_end,
     credit_balance:          r.credit_balance        ?? 0,
-    unlimited_expiry:        r.unlimited_expiry      ?? null,
-    unlimited_fills_used:    r.unlimited_fills_used  ?? 0,
-    unlimited_fills_max:     r.unlimited_fills_max   ?? 3000,
-    unlimited_fills_remaining: r.unlimited_fills_remaining ?? 0,
     agreement_no:            r.agreement_no          ?? null,
     used_contractors:        r.used_contractors      ?? [],
     max_contractors:         r.max_contractors       ?? 5,
     is_trial:                r.is_trial              ?? false,
     trial_active:            r.trial_active          ?? false,
     trial_days_remaining:    r.trial_days_remaining  ?? 0,
-    free_fills_remaining:    r.free_fills_remaining,
   };
+
+  if (r.cycle_spend !== undefined) usageData.cycle_spend = r.cycle_spend;
+  if (r.cycle_end !== undefined) usageData.cycle_end = r.cycle_end;
+  if (r.free_fills_remaining !== undefined) usageData.free_fills_remaining = r.free_fills_remaining;
+
+  return usageData;
 }
 
 // ── Local license state ───────────────────────────────────────
@@ -279,8 +277,8 @@ export function initLicenseButtons(): void {
     btn.disabled = true; btn.textContent = '…';
     try {
       document.getElementById('irwcmsDebug')?.remove();
-      const { default: scan } = await import('./ui');
-      (scan as any).scanIRWCMSPage?.();
+      const { scanIRWCMSPage } = await import('./ui');
+      scanIRWCMSPage();
 
       const stored = await chrome.storage.local.get(['licenseKey']) as { licenseKey?: string };
       if (stored.licenseKey) {

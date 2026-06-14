@@ -55,13 +55,8 @@ export interface UsageData {
   cycle_spend?: number;
   fills_this_cycle: number;
   today_fills: number;
-  annual_cap?: number;
   cycle_end?: string;
   credit_balance: number;
-  unlimited_expiry: string | null;
-  unlimited_fills_used: number;
-  unlimited_fills_max: number;
-  unlimited_fills_remaining: number;
   agreement_no: string | null;
   used_contractors: string[];
   max_contractors: number;
