@@ -1,7 +1,7 @@
 import type { SpeedLevel } from './types';
 
 export const LICENSE_SERVER_URL = 'https://irwcms.primerp.in' as const;
-export const CURRENT_VERSION   = '12.1' as const;
+export const CURRENT_VERSION   = '12.2' as const;
 
 /** Fixed delay for Department/Railway accounts (speed slider hidden) */
 export const DEPARTMENT_FIXED_DELAY_MS = 500;
