@@ -6,7 +6,6 @@ import { initLanguageSelector, loadSavedLanguage, initTabs, initSpeedControl,
          scanIRWCMSPage, GuidedTour, stopCountdown } from './ui';
 import { checkLicense, initLicenseButtons } from './license';
 import { initFileInput, initTemplateDownload, initPreviewExpand, selectSheet } from './preview';
-import { initCloud } from './cloud';
 import { initFillButton } from './fill';
 import { checkExistingRows } from './ui';
 import { isIrwcmsUrl } from './constants';
@@ -57,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSpeedControl(result['is_personal'] as boolean | undefined);
   });
 
-  // File / cloud / fill
+  // File / fill
   initFileInput(async () => {
     // Called after each sheet load — refresh existing-row count
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   initTemplateDownload();
   initPreviewExpand();
-  initCloud();
   initFillButton();
   initRefreshIconBridge();
 

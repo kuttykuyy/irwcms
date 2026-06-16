@@ -164,7 +164,6 @@ export function showLicenseActive(key: string, uses: number): void {
     }
 
     if (usesEl) usesEl.style.display = 'none';
-    updateExcelAccessForTrial(isTrial && !isSuperuser);
 
     // Superuser badge — set directly here because updateCreditsDisplay
     // may have already run before this async callback completed
@@ -186,33 +185,6 @@ export function showLicenseInactive(): void {
   document.getElementById('mainContent')?.classList.remove('visible');
   const usesEl = document.getElementById('usesInfo');
   if (usesEl) usesEl.style.display = 'none';
-}
-
-export function updateExcelAccessForTrial(isTrial: boolean): void {
-  const uploadTab    = document.querySelector<HTMLElement>('[data-tab="upload"]');
-  const tabContent   = document.getElementById('tab-upload');
-  const fileInputEl  = document.getElementById('fileInput') as HTMLInputElement | null;
-  document.getElementById('trialExcelOverlay')?.remove();
-
-  if (isTrial) {
-    if (fileInputEl) fileInputEl.disabled = true;
-    if (uploadTab) uploadTab.style.opacity = '0.5';
-    if (tabContent) {
-      const overlay = document.createElement('div');
-      overlay.id = 'trialExcelOverlay';
-      overlay.style.cssText = 'background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #f59e0b;border-radius:8px;padding:12px;margin-bottom:10px;text-align:center;';
-      overlay.innerHTML = `<div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:4px;">🔒 Excel Upload — Paid Feature</div>
-        <div style="font-size:11px;color:#a16207;line-height:1.4;">
-          Trial users can fill using the <strong>Measurement Builder</strong> only.<br>
-          <a href="https://irwcms.primerp.in/measurement-builder" target="_blank" style="color:#2563eb;text-decoration:underline;">Open Measurement Builder →</a>
-        </div>
-        <a href="https://irwcms.primerp.in/buy" target="_blank" style="display:inline-block;margin-top:6px;background:#2563eb;color:white;padding:4px 12px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:600;">⚡ Upgrade to Paid</a>`;
-      tabContent.insertBefore(overlay, tabContent.firstChild);
-    }
-  } else {
-    if (fileInputEl) fileInputEl.disabled = false;
-    if (uploadTab) uploadTab.style.opacity = '1';
-  }
 }
 
 // ── Button event listeners ────────────────────────────────────

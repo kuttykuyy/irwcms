@@ -555,7 +555,6 @@
 
       <div class="tabs">
         <div class="tab active" data-tab="upload">📁 Upload Excel</div>
-        <div class="tab" data-tab="cloud">☁️ Cloud</div>
       </div>
 
       <!-- Upload Tab -->
@@ -572,28 +571,6 @@
         <button id="downloadTemplateBtn" class="btn btn-pink" style="font-size:10px;">📥 Download Template</button>
       </div>
 
-      <!-- Cloud Tab -->
-      <div class="tab-content" id="tab-cloud">
-        <div id="cloudDataSection" style="display:none;">
-          <select class="select" id="cloudFileSelect">
-            <option value="">— Select saved file —</option>
-          </select>
-          <div id="cloudSheetSelect" style="display:none;">
-            <select class="select" id="cloudSheetSelector">
-              <option value="">— Select sheet —</option>
-            </select>
-          </div>
-          <div class="btn-row">
-            <button id="loadCloudDataBtn" class="btn btn-primary" disabled>📥 Load</button>
-            <button id="resetCloudBtn" class="btn btn-secondary" style="flex:0.3;" title="Reset">↺</button>
-          </div>
-        </div>
-        <button id="fetchCloudDataBtn" class="btn btn-cyan" style="font-size:11px;">🔄 Fetch Saved Files</button>
-        <div id="cloudStatus" style="font-size:10px;color:var(--muted);text-align:center;margin-top:5px;"></div>
-        <a href="https://irwcms.primerp.in/measurement-builder" target="_blank" class="quick-link-btn">
-          📊 Open Measurement Builder
-        </a>
-      </div>
     </div>
 
     <!-- Preview (shown after file load) ─────────────────────── -->
