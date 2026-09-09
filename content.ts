@@ -178,7 +178,21 @@ export function detectFormType(): FormTypeResult {
 
 export function extractPageInfo(): PageInfo {
   const info: PageInfo = {};
-  const allText  = document.body?.innerText || document.body?.textContent || '';
+
+  // Read the main document plus every same-origin iframe. The measurement form
+  // — and the header that carries the Agreement No — is often rendered inside
+  // an iframe, so reading document.body alone misses it. This is the same
+  // reason the fill and row-count paths go through searchDocuments().
+  const docs: Document[] = [document];
+  for (const iframe of document.querySelectorAll<HTMLIFrameElement>('iframe')) {
+    try {
+      const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
+      if (doc) docs.push(doc);
+    } catch { /* cross-origin iframe — not readable, skip */ }
+  }
+  const allText = docs
+    .map(d => d.body?.innerText || d.body?.textContent || '')
+    .join('\n');
 
   // Railway official name
   const nameMatch = allText.match(/Welcome\s+([A-Za-z][A-Za-z\s.]+?)\s*\(([^)]+)\)/i)
@@ -202,11 +216,15 @@ export function extractPageInfo(): PageInfo {
   );
   if (contractorMatch) info.contractorName = contractorMatch[1]!.trim();
 
-  // Measurement number
-  for (const inp of document.querySelectorAll<HTMLInputElement>('input[type="text"], input:not([type])')) {
-    if (/^\d{10,}\/[A-Z]+\/[A-Z]+\/[A-Z]+/i.test(inp.value?.trim() ?? '')) {
-      info.measurementNo = inp.value.trim(); break;
+  // Measurement number — search the same documents (main + iframes), since the
+  // measurement input also lives inside the form iframe on many IRWCMS pages.
+  for (const doc of docs) {
+    for (const inp of doc.querySelectorAll<HTMLInputElement>('input[type="text"], input:not([type])')) {
+      if (/^\d{10,}\/[A-Z]+\/[A-Z]+\/[A-Z]+/i.test(inp.value?.trim() ?? '')) {
+        info.measurementNo = inp.value.trim(); break;
+      }
     }
+    if (info.measurementNo) break;
   }
 
   info.pageTitle = document.title;
