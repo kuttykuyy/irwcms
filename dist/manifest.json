@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IRWCMS Bill Measurement Auto-Fill",
-  "version": "12.2",
+  "version": "12.9",
   "description": "Auto-fill IRWCMS bill measurement forms from Excel/CSV files",
 
   "permissions": ["activeTab", "scripting", "storage", "sidePanel"],
