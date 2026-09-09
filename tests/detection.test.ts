@@ -87,6 +87,21 @@ describe('extractPageInfo', () => {
     expect(info.agreementNo).toBe('SR/TPJ/Civil/2023/0071');
   });
 
+  it('extracts agreement number from the "Agreement No:" label', () => {
+    document.body.innerHTML = '<p>Agreement No:    CR/NGP/Civil/2025/0019</p>';
+    const info = extractPageInfo();
+    expect(info.agreementNo).toBe('CR/NGP/Civil/2025/0019');
+  });
+
+  it('extracts agreement number from inside a same-origin iframe', () => {
+    document.body.innerHTML = '<iframe id="f"></iframe>';
+    const iframe = document.getElementById('f') as HTMLIFrameElement;
+    const doc = iframe.contentDocument!;
+    doc.body.innerHTML = '<table><tr><td>Agreement No:</td><td>CR/NGP/Civil/2025/0019</td></tr></table>';
+    const info = extractPageInfo();
+    expect(info.agreementNo).toBe('CR/NGP/Civil/2025/0019');
+  });
+
   it('extracts measurement number from input field', () => {
     document.body.innerHTML = '<input type="text" value="10431110050748/SSE/PW/GOC">';
     const info = extractPageInfo();
